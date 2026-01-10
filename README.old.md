@@ -1,2 +1,2 @@
 # homeschool-summer-frontend
-Summertime Homeshool app repo
+Summertime Homeschool app repo
