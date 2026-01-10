@@ -1,0 +1,190 @@
+.homeschool-form-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+}
+
+.homeschool-form-container h1 {
+  color: #2c3e50;
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 2.5em;
+}
+
+.subtitle {
+  text-align: center;
+  color: #7f8c8d;
+  margin-bottom: 40px;
+  font-size: 1.2em;
+}
+
+.homeschool-form {
+  background-color: #ffffff;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 25px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #34495e;
+  font-weight: 600;
+  font-size: 1em;
+}
+
+.form-group input[type="text"],
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 1em;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.form-group input[type="text"]:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.form-group select {
+  cursor: pointer;
+  background-color: white;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Date Picker Styles */
+.date-picker-input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 1em;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.date-picker-input:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+/* React DatePicker custom styles */
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.react-datepicker__input-container {
+  width: 100%;
+}
+
+/* Submit Button */
+.submit-button {
+  width: 100%;
+  padding: 15px 30px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.submit-button:hover:not(:disabled) {
+  background-color: #2980b9;
+  transform: translateY(-2px);
+}
+
+.submit-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit-button:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
+/* Success Message */
+.success-message {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #d4edda;
+  border: 2px solid #28a745;
+  border-radius: 6px;
+  color: #155724;
+}
+
+.success-message h3 {
+  margin-top: 0;
+  color: #28a745;
+}
+
+.success-message pre {
+  background-color: #ffffff;
+  padding: 15px;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-size: 0.9em;
+}
+
+/* Error Message */
+.error-message {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #f8d7da;
+  border: 2px solid #dc3545;
+  border-radius: 6px;
+  color: #721c24;
+}
+
+.error-message h3 {
+  margin-top: 0;
+  color: #dc3545;
+}
+
+.error-message .help-text {
+  margin-top: 15px;
+  font-size: 0.9em;
+  background-color: #fff3cd;
+  padding: 10px;
+  border-radius: 4px;
+  color: #856404;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .homeschool-form-container {
+    padding: 20px 10px;
+  }
+
+  .homeschool-form {
+    padding: 25px 20px;
+  }
+
+  .homeschool-form-container h1 {
+    font-size: 2em;
+  }
+
+  .subtitle {
+    font-size: 1em;
+  }
+}
