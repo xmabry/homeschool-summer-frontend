@@ -83,9 +83,14 @@ const HomeschoolForm = () => {
 
     try {
       // Prepare data for API
+      // Note: `activityDate` captures when the learning activity occurred (user-selected),
+      // while `timestamp` records when this form was submitted. Both are sent so the
+      // backend can distinguish the event date from the submission/ingestion time.
       const payload = {
         ...formData,
+        // Date the activity actually took place (from the date picker)
         activityDate: formData.activityDate.toISOString(),
+        // ISO 8601 timestamp of when this record is submitted/created
         timestamp: new Date().toISOString(),
       };
 
