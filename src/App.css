@@ -1,6 +1,11 @@
+:root {
+  --app-gradient-start: #667eea;
+  --app-gradient-end: #764ba2;
+}
+
 .App {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--app-gradient-start) 0%, var(--app-gradient-end) 100%);
   padding: 20px 0;
 }
 
