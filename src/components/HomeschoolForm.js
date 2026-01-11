@@ -176,6 +176,8 @@ const HomeschoolForm = () => {
             dateFormat="MMMM d, yyyy"
             className="date-picker-input"
             required
+            aria-label="Activity date"
+            aria-required="true"
           />
         </div>
 
