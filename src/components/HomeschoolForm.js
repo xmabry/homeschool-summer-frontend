@@ -19,7 +19,16 @@ const HomeschoolForm = () => {
   const [error, setError] = useState(null);
 
   // Configuration for AWS API Gateway
-  const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || 'https://your-api-gateway-url.amazonaws.com/prod';
+  const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
+  if (!API_ENDPOINT) {
+    // In development, surface a clear configuration error.
+    // Ensure REACT_APP_API_ENDPOINT is set in your environment (e.g., .env file).
+    // eslint-disable-next-line no-console
+    console.error(
+      'HomeschoolForm: REACT_APP_API_ENDPOINT is not set. ' +
+      'Please configure the API endpoint before using this form.'
+    );
+  }
 
   const gradeLevels = [
     { value: '', label: 'Select Grade Level' },
