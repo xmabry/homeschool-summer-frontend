@@ -10,21 +10,39 @@ This guide will help you get the Homeschool Summer Frontend application up and r
 npm install
 ```
 
-## Step 2: Configure AWS API Gateway (Optional)
+## Step 2: Configure Environment Variables
 
-If you want to connect to an AWS API Gateway backend:
+### Required for AWS Cognito Authentication (Required)
+
+The app now uses AWS Cognito for authentication. You must configure these environment variables:
 
 1. Copy the example environment file:
    ```bash
    cp .env.example .env
    ```
 
-2. Edit `.env` and add your API Gateway endpoint:
+2. Edit `.env` and configure your AWS Cognito settings:
    ```
+   # AWS Cognito Configuration (Required)
+   REACT_APP_COGNITO_USER_POOL_ID=your-user-pool-id
+   REACT_APP_COGNITO_USER_POOL_CLIENT_ID=your-client-id
+   REACT_APP_AWS_REGION=us-east-1
+   
+   # AWS API Gateway Configuration (Optional)
    REACT_APP_API_ENDPOINT=https://your-api-gateway-url.amazonaws.com/prod
    ```
 
-If you skip this step, the app will still work but will show an error message when you try to submit the form.
+### Setting Up AWS Cognito
+
+1. Go to [AWS Cognito Console](https://console.aws.amazon.com/cognito/)
+2. Create a new User Pool
+3. Note down your User Pool ID and User Pool Client ID
+4. Configure the client app settings:
+   - Enable "Username" and "Email" as sign-in options
+   - Set password policy as needed
+   - Disable MFA for development (optional)
+
+If you skip Cognito configuration, the app will not function as authentication is required.
 
 ## Step 3: Run the Development Server
 
@@ -33,6 +51,23 @@ npm start
 ```
 
 The application will automatically open in your browser at [http://localhost:3000](http://localhost:3000)
+
+**Note:** The app now has a login page. For development, you can use any username and password combination to log in (authentication will be handled by Cognito in production).
+
+## Application Features
+
+### Login System
+- AWS Cognito-powered authentication
+- Secure user sessions
+- Automatic logout functionality
+
+### Activity Generator Form
+- **Grade Level Selection:** Kindergarten through 12th grade
+- **Subject Areas:** Math, Science, English/Language Arts, History, Art, Music, PE, Coding, and Foreign Language  
+- **Multi-Select Skills:** Choose multiple learning objectives like Critical Thinking, Problem Solving, Creativity, etc.
+- **Activity Date:** Date picker for when the activity took place
+- **Custom Prompts:** Detailed description for AI-powered activity generation
+- **Real-time Validation:** Form validation and error handling
 
 ## Step 4: Build for Production
 
@@ -52,9 +87,11 @@ This creates an optimized production build in the `build/` directory.
 2. Click "New app" → "Host web app"
 3. Connect your GitHub repository
 4. Amplify will auto-detect the `amplify.yml` configuration
-5. Add environment variable:
-   - Key: `REACT_APP_API_ENDPOINT`
-   - Value: Your API Gateway URL
+5. Add environment variables:
+   - Key: `REACT_APP_API_ENDPOINT`, Value: Your API Gateway URL
+   - Key: `REACT_APP_COGNITO_USER_POOL_ID`, Value: Your User Pool ID
+   - Key: `REACT_APP_COGNITO_USER_POOL_CLIENT_ID`, Value: Your Client ID
+   - Key: `REACT_APP_AWS_REGION`, Value: Your AWS Region (e.g., us-east-1)
 6. Click "Save and deploy"
 
 ### Method 2: Amplify CLI
@@ -77,23 +114,38 @@ amplify publish
 
 Your AWS API Gateway should have:
 
-- **Endpoint:** `/activities`
+- **Endpoint:** `/generate-hw` (updated from `/activities`)
 - **Method:** POST
 - **CORS enabled** with appropriate headers
+- **Authentication:** Integrate with AWS Cognito for secure API access
 - **Expected payload:**
   ```json
   {
-    "studentName": "string",
-    "gradeLevel": "string",
-    "subject": "string",
+    "gradeLevel": "string (e.g., 'kindergarten', '1st', '2nd', etc.)",
+    "subject": "string (e.g., 'math', 'science', 'english', etc.)",
     "activityDate": "ISO 8601 date string",
-    "description": "string",
-    "learningGoals": "string",
-    "timestamp": "ISO 8601 date string"
+    "prompt": "string (detailed activity description)",
+    "skills": ["array", "of", "selected", "skills"],
+    "timestamp": "ISO 8601 date string (auto-generated)"
   }
   ```
 
+## Current Dependencies
+
+The application now includes:
+
+- **Authentication:** `aws-amplify`, `@aws-amplify/ui-react`
+- **HTTP Requests:** `axios`
+- **Date Handling:** `react-datepicker` 
+- **UI Components:** React 19.2.3
+- **Testing:** Latest React Testing Library
+
 ## Troubleshooting
+
+### Authentication Issues
+- Verify your Cognito User Pool ID and Client ID are correct
+- Ensure the AWS region matches your Cognito setup
+- Check that your Cognito app client has the correct configuration
 
 ### Build warnings about date-fns
 This is a known warning from the react-datepicker dependency and can be safely ignored.
