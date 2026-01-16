@@ -39,6 +39,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     
     const result = await cognitoService.signIn(username, password);
+    setLoading(false);
     
     if (result.success) {
       setUser(result.user);
@@ -47,7 +48,6 @@ export const AuthProvider = ({ children }) => {
       setError(result.error);
       return { success: false, error: result.error };
     }
-    setLoading(false);
   };
 
   const logout = async () => {

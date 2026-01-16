@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import './HWHistory.css';
+import '../styles/HWHistory.css';
 
 const HWHistory = () => {
   const [homeworkHistory, setHomeworkHistory] = useState([]);
