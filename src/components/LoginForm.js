@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import '../styles/LoginForm.css';
+import ErrorResponse from './ErrorResponse';
 
 const LoginForm = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [localError, setLocalError] = useState('');
   
-  const { login, loading, error } = useAuth();
+  const { login, loading, error, clearError } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,13 +35,6 @@ const LoginForm = () => {
     <div className="login-container">
       <form className="login-form" onSubmit={handleSubmit}>
         <h2 className="login-header">Login</h2>
-        
-        {/* Display errors */}
-        {(error || localError) && (
-          <div className="error-message">
-            {error || localError}
-          </div>
-        )}
         
         <div className="form-group">
           <label className="form-label" htmlFor="username">
@@ -91,6 +85,18 @@ const LoginForm = () => {
           </p>
         </div>
       </form>
+      
+      <ErrorResponse 
+        error={(error || localError) ? { message: error || localError } : null}
+        onRetry={() => {
+          setLocalError('');
+          clearError();
+        }}
+        onDismiss={() => {
+          setLocalError('');
+          clearError();
+        }}
+      />
     </div>
   );
 };

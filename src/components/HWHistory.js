@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import '../styles/HWHistory.css';
+import ErrorResponse from './ErrorResponse';
 
 const HWHistory = () => {
   const [homeworkHistory, setHomeworkHistory] = useState([]);
@@ -111,7 +112,17 @@ const HWHistory = () => {
   if (error) {
     return (
       <div className="hw-history-container">
-        <div className="error-message">Error: {error}</div>
+        <ErrorResponse 
+          error={{ message: error }}
+          onRetry={() => {
+            setError(null);
+            // Retry loading the history
+            window.location.reload();
+          }}
+          onDismiss={() => {
+            setError(null);
+          }}
+        />
       </div>
     );
   }

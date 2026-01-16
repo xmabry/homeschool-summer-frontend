@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '../styles/ForgotPassword.css';
+import ErrorResponse from './ErrorResponse';
 
 const ForgotPassword = ({ onClose, onBack }) => {
   const [email, setEmail] = useState('');
@@ -84,13 +85,14 @@ const ForgotPassword = ({ onClose, onBack }) => {
             </button>
           </div>
         )}
-        
-        {message && !isSuccess && (
-          <div className="error-message">
-            {message}
-          </div>
-        )}
       </div>
+      
+      <ErrorResponse 
+        error={(message && !isSuccess) ? { message } : null}
+        onDismiss={() => {
+          setMessage('');
+        }}
+      />
     </div>
   );
 };

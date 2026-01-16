@@ -89,6 +89,10 @@ export const AuthProvider = ({ children }) => {
     return result;
   };
 
+  const clearError = () => {
+    setError(null);
+  };
+
   const value = {
     user,
     loading,
@@ -97,6 +101,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     signup,
     confirmSignup,
+    clearError,
     isAuthenticated: !!user,
   };
 

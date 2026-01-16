@@ -3,6 +3,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import axios from 'axios';
 import '../styles/GererateActivityForm.css';
+import ErrorResponse from './ErrorResponse';
 
 const GenerateActivityForm = () => {
   const [formData, setFormData] = useState({
@@ -253,18 +254,20 @@ const GenerateActivityForm = () => {
           <pre>{JSON.stringify(response, null, 2)}</pre>
         </div>
       )}
-
-      {/* Error Message */}
-      {error && (
-        <div className="error-message">
-          <h3>⚠ Error</h3>
-          <p>{error}</p>
-          <p className="help-text">
-            To connect to AWS API Gateway, set the REACT_APP_API_ENDPOINT 
-            environment variable in your .env file.
-          </p>
-        </div>
-      )}
+      
+      <ErrorResponse 
+        error={error ? { 
+          message: 'Failed to submit activity',
+          details: error
+        } : null}
+        onRetry={() => {
+          setError(null);
+          handleSubmit(new Event('submit'));
+        }}
+        onDismiss={() => {
+          setError(null);
+        }}
+      />
     </div>
   );
 };
