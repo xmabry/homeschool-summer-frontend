@@ -52,12 +52,14 @@ const GenerateActivityForm = () => {
     { value: 'math', label: 'Mathematics' },
     { value: 'science', label: 'Science' },
     { value: 'english', label: 'English/Language Arts' },
+    { value: 'finance', label: 'Finance' },
     { value: 'history', label: 'History/Social Studies' },
     { value: 'coding', label: 'Coding/Computer Science' },
     { value: 'art', label: 'Art' },
     { value: 'music', label: 'Music' },
     { value: 'physical-ed', label: 'Physical Education' },
-    { value: 'foreign-language', label: 'Foreign Language' }
+    { value: 'geography', label: 'Geography' },
+    { value: 'spanish', label: 'Spanish' }
   ];
 
   const skills = [
@@ -67,9 +69,7 @@ const GenerateActivityForm = () => {
     { value: 'creativity', label: 'Creativity' },
     { value: 'collaboration', label: 'Collaboration' },
     { value: 'communication', label: 'Communication' },
-    { value: 'self-management', label: 'Self-Management' },
-    { value: 'technology-literacy', label: 'Technology Literacy' },
-    { value: 'research-skills', label: 'Research Skills' },
+    { value: 'leadership', label: 'Leadership' },
     { value: 'time-management', label: 'Time Management' },
     { value: 'adaptability', label: 'Adaptability' },
   ];
