@@ -31,18 +31,24 @@ jobs:
             echo "ENVIRONMENT=production" >> $GITHUB_ENV
             echo "API_ENDPOINT=${{ secrets.REACT_APP_API_ENDPOINT }}" >> $GITHUB_ENV
             echo "AMPLIFY_BRANCH=main" >> $GITHUB_ENV
+            ENV_NAME="production"
+            API_URL="${{ secrets.REACT_APP_API_ENDPOINT }}"
           elif [ "${{ github.ref_name }}" = "develop" ]; then
             echo "ENVIRONMENT=development" >> $GITHUB_ENV
             echo "API_ENDPOINT=${{ secrets.REACT_APP_API_DEV_ENDPOINT }}" >> $GITHUB_ENV
             echo "AMPLIFY_BRANCH=develop" >> $GITHUB_ENV
+            ENV_NAME="development"
+            API_URL="${{ secrets.REACT_APP_API_DEV_ENDPOINT }}"
           else
             echo "ENVIRONMENT=staging" >> $GITHUB_ENV
             echo "API_ENDPOINT=${{ secrets.REACT_APP_API_DEV_ENDPOINT }}" >> $GITHUB_ENV
             echo "AMPLIFY_BRANCH=develop" >> $GITHUB_ENV
+            ENV_NAME="staging"
+            API_URL="${{ secrets.REACT_APP_API_DEV_ENDPOINT }}"
           fi
           
-          echo "Deploying to $ENVIRONMENT environment"
-          echo "Using API endpoint: $API_ENDPOINT"
+          echo "Deploying to $ENV_NAME environment"
+          echo "Using API endpoint: $API_URL"
           
       - name: Create environment file
         run: |
@@ -77,10 +83,8 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           role-session-name: GitHubActions-FrontendDeploy
           aws-region: ${{ secrets.REACT_APP_AWS_REGION || 'us-east-1' }}
-          
 
       - name: Deploy to AWS Amplify (if using Amplify)
-        if: ${{ secrets.AMPLIFY_APP_ID }}
         run: |
           # Trigger Amplify deployment for appropriate branch
           aws amplify start-job \
@@ -98,10 +102,6 @@ jobs:
           echo "API Endpoint: ${{ env.API_ENDPOINT }}"
           echo "Build completed at: $(date)"
           echo "Commit SHA: ${{ github.sha }}"
-          
-          if [ -n "${{ secrets.S3_BUCKET_NAME }}" ]; then
-            echo "Deployed to S3: ${{ secrets.S3_BUCKET_NAME }}"
-          fi
           
           if [ -n "${{ secrets.AMPLIFY_APP_ID }}" ]; then
             echo "Amplify App ID: ${{ secrets.AMPLIFY_APP_ID }}"
