@@ -14,3 +14,9 @@ const config = {
     }
   }
 };
+
+// Configure Amplify with the config
+Amplify.configure(config);
+
+// Export for use in other files if needed
+export default config;

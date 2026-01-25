@@ -49,4 +49,5 @@ class CognitoService {
   }
 }
 
-export default new CognitoService();
+const cognitoService = new CognitoService();
+export default cognitoService;
