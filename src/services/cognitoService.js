@@ -1,5 +1,5 @@
 import { Amplify } from 'aws-amplify';
-import { signIn, signOut, getCurrentUser, signUp, confirmSignUp, resendSignUpCode } from 'aws-amplify/auth';
+import { signIn, signOut, getCurrentUser } from 'aws-amplify/auth';
 
 // Configure Amplify with your Cognito settings
 Amplify.configure({
@@ -27,39 +27,6 @@ class CognitoService {
     }
   }
 
-  // Sign up new user
-  async signUp(username, password, email) {
-    try {
-      const result = await signUp({
-        username,
-        password,
-        options: {
-          userAttributes: {
-            email
-          }
-        }
-      });
-      return { success: true, result };
-    } catch (error) {
-      console.error('Error signing up:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Confirm sign up with verification code
-  async confirmSignUp(username, confirmationCode) {
-    try {
-      await confirmSignUp({
-        username,
-        confirmationCode
-      });
-      return { success: true };
-    } catch (error) {
-      console.error('Error confirming sign up:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
   // Sign out user
   async signOut() {
     try {
@@ -77,17 +44,6 @@ class CognitoService {
       const user = await getCurrentUser();
       return { success: true, user };
     } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Resend confirmation code
-  async resendConfirmationCode(username) {
-    try {
-      await resendSignUpCode({ username });
-      return { success: true };
-    } catch (error) {
-      console.error('Error resending code:', error);
       return { success: false, error: error.message };
     }
   }
