@@ -91,6 +91,7 @@ jobs:
             --app-id ${{ secrets.AMPLIFY_APP_ID }} \
             --branch-name ${{ env.AMPLIFY_BRANCH }} \
             --job-type RELEASE
+            
           echo "Triggered Amplify deployment for branch: ${{ env.AMPLIFY_BRANCH }}"
             
       - name: Output deployment info
