@@ -46,7 +46,6 @@ jobs:
             ENV_NAME="staging"
             API_URL="${{ secrets.REACT_APP_API_DEV_ENDPOINT }}"
           fi
-          
           echo "Deploying to $ENV_NAME environment"
           echo "Using API endpoint: $API_URL"
           
