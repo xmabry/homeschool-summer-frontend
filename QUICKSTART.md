@@ -54,7 +54,7 @@ npm start
 
 The application will automatically open in your browser at [http://localhost:3000](http://localhost:3000)
 
-**Note:** The app now has a login page. For development, you can use any username and password combination to log in (authentication will be handled by Cognito in production).
+**Note:** The app now has a login page. Authentication is handled by AWS Cognito in both development and production, so you must log in using a valid user from your configured Cognito User Pool; arbitrary usernames and passwords will not work.
 
 ## Application Features
 
