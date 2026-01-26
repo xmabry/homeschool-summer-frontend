@@ -5,7 +5,7 @@ export const generateActivity = async (activityData) => {
     const token = (await Auth.currentSession()).getIdToken().getJwtToken();
     const user = await Auth.currentAuthenticatedUser();
     
-    const response = await fetch(`${import.meta.env.REACT_APP_API_ENDPOINT}/generate-hw`, {
+    const response = await fetch(`${import.meta.env.REACT_APP_API_ENDPOINT}/activities/generate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -39,7 +39,7 @@ export const getHistory = async (filters = {}) => {
       ...filters
     });
     
-    const response = await fetch(`${import.meta.env.REACT_APP_API_ENDPOINT}/history?${queryParams}`, {
+    const response = await fetch(`${import.meta.env.REACT_APP_API_ENDPOINT}/activities/history`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

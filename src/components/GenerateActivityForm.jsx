@@ -148,8 +148,8 @@ const GenerateActivityForm = () => {
 
   return (
     <div className="homeschool-form-container">
-      <h1>Homeschool Summer Activity Log</h1>
-      <p className="subtitle">Record your summer learning activities</p>
+      <h1>Homeschool Summer Activity Generator</h1>
+      <p className="subtitle">Submit parameters to develop a prompt for the type of learning activity you want to generate.</p>
 
       <form onSubmit={handleSubmit} className="homeschool-form">
 

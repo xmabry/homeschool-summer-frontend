@@ -150,7 +150,7 @@ export const getDownloadURL = async (pdfKey, userId, token, bucketName = null) =
       params.append('bucket', bucketName);
     }
     
-    const response = await fetch(`https://your-api-gateway-url/download?${params.toString()}`, {
+    const response = await fetch(`${import.meta.env.REACT_APP_API_ENDPOINT}/activities?${params.toString()}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
