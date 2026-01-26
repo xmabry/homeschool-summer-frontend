@@ -1,8 +1,37 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth as useOidcAuth } from 'react-oidc-context';
 import '../styles/LoginForm.css';
 import ErrorResponse from './ErrorResponse';
 
+const useAuth = () => {
+  const oidcAuth = useOidcAuth();
+
+  const login = async () => {
+    try {
+      await oidcAuth.signinRedirect();
+      return { success: true };
+    } catch (err) {
+      return {
+        success: false,
+        error: (err && err.message) ? err.message : 'Login failed',
+      };
+    }
+  };
+
+  const clearError = () => {
+    // react-oidc-context does not expose an explicit error reset API.
+    // This is a no-op placeholder to match the expected interface.
+  };
+
+  return {
+    login,
+    loading: oidcAuth.isLoading,
+    error: oidcAuth.error
+      ? (oidcAuth.error.message || String(oidcAuth.error))
+      : null,
+    clearError,
+  };
+};
 const LoginForm = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
