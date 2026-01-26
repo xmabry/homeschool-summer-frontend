@@ -22,6 +22,9 @@ The app now uses AWS Cognito for authentication. You must configure these enviro
    ```
 
 2. Edit `.env` and configure your AWS Cognito settings:
+   
+   **Note:** Some environment variables appear duplicated because different parts of the codebase use different naming conventions (react-oidc-context vs aws-amplify). All variables listed below are required.
+   
    ```
    # AWS Cognito Configuration (Required)
    REACT_APP_COGNITO_USER_POOL_ID=your-user-pool-id
@@ -32,17 +35,17 @@ The app now uses AWS Cognito for authentication. You must configure these enviro
    
    # OIDC Configuration (Required for react-oidc-context)
    REACT_APP_COGNITO_AUTHORITY=https://cognito-idp.us-east-1.amazonaws.com/your-user-pool-id
-   REACT_APP_COGNITO_CLIENT_ID=your-client-id
+   REACT_APP_COGNITO_CLIENT_ID=your-client-id                # Same value as REACT_APP_COGNITO_USER_POOL_CLIENT_ID
    REACT_APP_COGNITO_REDIRECT_URI=http://localhost:3000
    
    # AWS Amplify Configuration (if using aws-amplify)
-   REACT_APP_USER_POOL_ID=your-user-pool-id
-   REACT_APP_USER_POOL_WEB_CLIENT_ID=your-client-id
-   REACT_APP_USER_POOL_DOMAIN=https://your-domain.auth.us-east-1.amazoncognito.com
+   REACT_APP_USER_POOL_ID=your-user-pool-id                  # Same value as REACT_APP_COGNITO_USER_POOL_ID
+   REACT_APP_USER_POOL_WEB_CLIENT_ID=your-client-id          # Same value as REACT_APP_COGNITO_USER_POOL_CLIENT_ID
+   REACT_APP_USER_POOL_DOMAIN=https://your-domain.auth.us-east-1.amazoncognito.com  # Same value as REACT_APP_COGNITO_DOMAIN
    
    # AWS API Gateway Configuration (Required)
    REACT_APP_API_ENDPOINT=https://your-api-gateway-url.amazonaws.com/prod
-   REACT_APP_API_GATEWAY_URL=https://your-api-gateway-url.amazonaws.com/prod
+   REACT_APP_API_GATEWAY_URL=https://your-api-gateway-url.amazonaws.com/prod        # Same value as REACT_APP_API_ENDPOINT
    ```
 
 ### Setting Up AWS Cognito
