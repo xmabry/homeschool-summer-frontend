@@ -27,11 +27,22 @@ The app now uses AWS Cognito for authentication. You must configure these enviro
    REACT_APP_COGNITO_USER_POOL_ID=your-user-pool-id
    REACT_APP_COGNITO_USER_POOL_CLIENT_ID=your-client-id
    REACT_APP_AWS_REGION=us-east-1
-   REACT_APP_COGNITO_DOMAIN=your-cognito-domain             # e.g. https://your-domain.auth.us-east-1.amazoncognito.com
-   REACT_APP_LOGOUT_URI=http://localhost:3000                # redirect URI after logout
+   REACT_APP_COGNITO_DOMAIN=https://your-domain.auth.us-east-1.amazoncognito.com
+   REACT_APP_LOGOUT_URI=http://localhost:3000
    
-   # AWS API Gateway Configuration (Optional)
+   # OIDC Configuration (Required for react-oidc-context)
+   REACT_APP_COGNITO_AUTHORITY=https://cognito-idp.us-east-1.amazonaws.com/your-user-pool-id
+   REACT_APP_COGNITO_CLIENT_ID=your-client-id
+   REACT_APP_COGNITO_REDIRECT_URI=http://localhost:3000
+   
+   # AWS Amplify Configuration (if using aws-amplify)
+   REACT_APP_USER_POOL_ID=your-user-pool-id
+   REACT_APP_USER_POOL_WEB_CLIENT_ID=your-client-id
+   REACT_APP_USER_POOL_DOMAIN=https://your-domain.auth.us-east-1.amazoncognito.com
+   
+   # AWS API Gateway Configuration (Required)
    REACT_APP_API_ENDPOINT=https://your-api-gateway-url.amazonaws.com/prod
+   REACT_APP_API_GATEWAY_URL=https://your-api-gateway-url.amazonaws.com/prod
    ```
 
 ### Setting Up AWS Cognito
@@ -90,10 +101,19 @@ This creates an optimized production build in the `build/` directory.
 3. Connect your GitHub repository
 4. Amplify will auto-detect the `amplify.yml` configuration
 5. Add environment variables:
-   - Key: `REACT_APP_API_ENDPOINT`, Value: Your API Gateway URL
    - Key: `REACT_APP_COGNITO_USER_POOL_ID`, Value: Your User Pool ID
    - Key: `REACT_APP_COGNITO_USER_POOL_CLIENT_ID`, Value: Your Client ID
    - Key: `REACT_APP_AWS_REGION`, Value: Your AWS Region (e.g., us-east-1)
+   - Key: `REACT_APP_COGNITO_DOMAIN`, Value: Your Cognito Domain (e.g., https://your-domain.auth.us-east-1.amazoncognito.com)
+   - Key: `REACT_APP_LOGOUT_URI`, Value: Your App URL (e.g., https://your-app.amplifyapp.com)
+   - Key: `REACT_APP_COGNITO_AUTHORITY`, Value: Your OIDC Authority (e.g., https://cognito-idp.us-east-1.amazonaws.com/your-user-pool-id)
+   - Key: `REACT_APP_COGNITO_CLIENT_ID`, Value: Your Client ID
+   - Key: `REACT_APP_COGNITO_REDIRECT_URI`, Value: Your App URL (e.g., https://your-app.amplifyapp.com)
+   - Key: `REACT_APP_USER_POOL_ID`, Value: Your User Pool ID
+   - Key: `REACT_APP_USER_POOL_WEB_CLIENT_ID`, Value: Your Client ID
+   - Key: `REACT_APP_USER_POOL_DOMAIN`, Value: Your Cognito Domain
+   - Key: `REACT_APP_API_ENDPOINT`, Value: Your API Gateway URL
+   - Key: `REACT_APP_API_GATEWAY_URL`, Value: Your API Gateway URL
 6. Click "Save and deploy"
 
 ### Method 2: Amplify CLI
