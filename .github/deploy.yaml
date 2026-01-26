@@ -59,7 +59,9 @@ jobs:
           # AWS Cognito Configuration
           REACT_APP_COGNITO_USER_POOL_ID=${{ secrets.REACT_APP_COGNITO_USER_POOL_ID }}
           REACT_APP_COGNITO_USER_POOL_CLIENT_ID=${{ secrets.REACT_APP_COGNITO_USER_POOL_CLIENT_ID }}
+          REACT_APP_COGNITO_CLIENT_ID=${{ secrets.REACT_APP_COGNITO_USER_POOL_CLIENT_ID }}
           REACT_APP_COGNITO_DOMAIN=${{ secrets.REACT_APP_COGNITO_DOMAIN }}
+          REACT_APP_COGNITO_AUTHORITY=${{ secrets.REACT_APP_COGNITO_DOMAIN }}
           REACT_APP_LOGOUT_URI=${{ secrets.REACT_APP_LOGOUT_URI }}
           
           # API Configuration - Dynamic based on branch
