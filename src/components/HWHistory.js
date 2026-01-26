@@ -45,7 +45,7 @@ const HWHistory = () => {
   // Filter and sort data
   const filteredAndSortedData = useMemo(() => {
     let filteredData = homeworkHistory.filter(item => {
-      const matchesGrade = !filterGrade || item.grade === filterGrade;
+      const matchesGrade = !filterGrade || item.gradeLevel === filterGrade;
       const matchesSubject = !filterSubject || item.subject === filterSubject;
       const matchesSearch = !searchTerm || 
         item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -81,7 +81,7 @@ const HWHistory = () => {
   }, [homeworkHistory, sortConfig, filterGrade, filterSubject, searchTerm]);
 
   // Get unique grades and subjects for filters
-  const uniqueGrades = [...new Set(homeworkHistory.map(item => item.grade))].sort();
+  const uniqueGrades = [...new Set(homeworkHistory.map(item => item.gradeLevel))].sort();
   const uniqueSubjects = [...new Set(homeworkHistory.map(item => item.subject))].sort();
 
   const getSortIcon = (columnName) => {
@@ -173,8 +173,8 @@ const HWHistory = () => {
               <th onClick={() => requestSort('title')} className="sortable">
                 Title {getSortIcon('title')}
               </th>
-              <th onClick={() => requestSort('grade')} className="sortable">
-                Grade {getSortIcon('grade')}
+              <th onClick={() => requestSort('gradeLevel')} className="sortable">
+                Grade {getSortIcon('gradeLevel')}
               </th>
               <th onClick={() => requestSort('subject')} className="sortable">
                 Subject {getSortIcon('subject')}
@@ -195,7 +195,7 @@ const HWHistory = () => {
                 <tr key={homework.id || index} className="table-row">
                   <td className="title-cell">{homework.title || 'Untitled'}</td>
                   <td className="grade-cell">
-                    <span className="grade-badge">Grade {homework.grade}</span>
+                    <span className="grade-badge">Grade {homework.gradeLevel}</span>
                   </td>
                   <td className="subject-cell">{homework.subject}</td>
                   <td className="difficulty-cell">
