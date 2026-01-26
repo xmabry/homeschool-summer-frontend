@@ -5,15 +5,13 @@
  * Download a PDF file from S3 using the downloader Lambda
  * @param {string} pdfKey - The S3 key/path to the PDF file
  * @param {string} userId - The user ID for access validation
+ * @param {string} token - The authentication token (JWT)
  * @param {string} bucketName - Optional bucket name (uses default if not provided)
  * @returns {Promise<void>} - Triggers browser download
  */
-export const downloadPDF = async (pdfKey, userId, bucketName = null) => {
+export const downloadPDF = async (pdfKey, userId, token, bucketName = null) => {
   try {
     console.log(`Initiating download for: ${pdfKey}`);
-    
-    // Get the JWT token from your auth context
-    const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
     
     if (!token) {
       throw new Error('Authentication token not found. Please log in again.');
@@ -106,7 +104,7 @@ export const downloadPDF = async (pdfKey, userId, bucketName = null) => {
 
 /**
  * Download multiple PDFs as a batch
- * @param {Array} pdfList - Array of {key, userId, bucketName} objects
+ * @param {Array} pdfList - Array of {key, userId, token, bucketName} objects
  * @returns {Promise<Array>} - Array of download results
  */
 export const downloadMultiplePDFs = async (pdfList) => {
@@ -114,7 +112,7 @@ export const downloadMultiplePDFs = async (pdfList) => {
   
   for (const pdf of pdfList) {
     try {
-      const result = await downloadPDF(pdf.key, pdf.userId, pdf.bucketName);
+      const result = await downloadPDF(pdf.key, pdf.userId, pdf.token, pdf.bucketName);
       results.push({ ...pdf, success: true, result });
       
       // Add small delay between downloads to avoid overwhelming the browser
@@ -133,13 +131,12 @@ export const downloadMultiplePDFs = async (pdfList) => {
  * Get download URL without triggering download (useful for preview)
  * @param {string} pdfKey - The S3 key/path to the PDF file
  * @param {string} userId - The user ID for access validation
+ * @param {string} token - The authentication token (JWT)
  * @param {string} bucketName - Optional bucket name
  * @returns {Promise<Object>} - Object with download URL and metadata
  */
-export const getDownloadURL = async (pdfKey, userId, bucketName = null) => {
+export const getDownloadURL = async (pdfKey, userId, token, bucketName = null) => {
   try {
-    const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-    
     if (!token) {
       throw new Error('Authentication token not found');
     }
