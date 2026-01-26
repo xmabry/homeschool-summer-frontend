@@ -11,9 +11,9 @@ function App() {
   const [currentView, setCurrentView] = useState('generate'); // 'generate' or 'history'
 
   const signOutRedirect = () => {
-    const clientId = process.env.REACT_APP_COGNITO_CLIENT_ID;
-    const logoutUri = process.env.REACT_APP_LOGOUT_URI;
-    const cognitoDomain = process.env.REACT_APP_COGNITO_DOMAIN;
+    const clientId = import.meta.env.REACT_APP_COGNITO_CLIENT_ID;
+    const logoutUri = import.meta.env.REACT_APP_LOGOUT_URI;
+    const cognitoDomain = import.meta.env.REACT_APP_COGNITO_DOMAIN;
     
     if (!clientId || !logoutUri || !cognitoDomain) {
       console.error('Missing required environment variables for logout');

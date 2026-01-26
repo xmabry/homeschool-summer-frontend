@@ -19,7 +19,7 @@ const GenerateActivityForm = () => {
   const [error, setError] = useState(null);
 
   // Configuration for AWS API Gateway
-  const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
+  const API_ENDPOINT = import.meta.env.REACT_APP_API_ENDPOINT;
   if (!API_ENDPOINT) {
     // In development, surface a clear configuration error.
     // Ensure REACT_APP_API_ENDPOINT is set in your environment (e.g., .env file).

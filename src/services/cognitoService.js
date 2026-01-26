@@ -5,9 +5,9 @@ import { signIn, signOut, getCurrentUser, signUp, confirmSignUp } from 'aws-ampl
 Amplify.configure({
   Auth: {
     Cognito: {
-      userPoolId: process.env.REACT_APP_COGNITO_USER_POOL_ID,
-      userPoolClientId: process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID,
-      region: process.env.REACT_APP_AWS_REGION || 'us-east-1',
+      userPoolId: import.meta.env.REACT_APP_COGNITO_USER_POOL_ID,
+      userPoolClientId: import.meta.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID,
+      region: import.meta.env.REACT_APP_AWS_REGION || 'us-east-1',
     }
   }
 });
