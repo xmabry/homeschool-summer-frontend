@@ -1,0 +1,246 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import '../styles/HWHistory.css';
+import ErrorResponse from './ErrorResponse';
+
+const HWHistory = () => {
+  const [homeworkHistory, setHomeworkHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [sortConfig, setSortConfig] = useState({ key: 'createdAt', direction: 'desc' });
+  const [filterGrade, setFilterGrade] = useState('');
+  const [filterSubject, setFilterSubject] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Fetch homework history from DynamoDB
+  useEffect(() => {
+    const fetchHomeworkHistory = async () => {
+      try {
+        setLoading(true);
+        // Replace with your actual API endpoint
+        const response = await fetch('/api/homework-history');
+        if (!response.ok) {
+          throw new Error('Failed to fetch homework history');
+        }
+        const data = await response.json();
+        setHomeworkHistory(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHomeworkHistory();
+  }, []);
+
+  // Sorting function
+  const requestSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  // Filter and sort data
+  const filteredAndSortedData = useMemo(() => {
+    let filteredData = homeworkHistory.filter(item => {
+      const matchesGrade = !filterGrade || item.grade === filterGrade;
+      const matchesSubject = !filterSubject || item.subject === filterSubject;
+      const matchesSearch = !searchTerm || 
+        item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      return matchesGrade && matchesSubject && matchesSearch;
+    });
+
+    // Sort data
+    if (sortConfig.key) {
+      filteredData.sort((a, b) => {
+        let aValue = a[sortConfig.key];
+        let bValue = b[sortConfig.key];
+
+        // Handle date sorting
+        if (sortConfig.key === 'createdAt' || sortConfig.key === 'updatedAt') {
+          aValue = new Date(aValue);
+          bValue = new Date(bValue);
+        }
+
+        if (aValue < bValue) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
+    return filteredData;
+  }, [homeworkHistory, sortConfig, filterGrade, filterSubject, searchTerm]);
+
+  // Get unique grades and subjects for filters
+  const uniqueGrades = [...new Set(homeworkHistory.map(item => item.grade))].sort();
+  const uniqueSubjects = [...new Set(homeworkHistory.map(item => item.subject))].sort();
+
+  const getSortIcon = (columnName) => {
+    if (sortConfig.key === columnName) {
+      return sortConfig.direction === 'asc' ? '↑' : '↓';
+    }
+    return '↕';
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="hw-history-container">
+        <div className="loading-spinner">Loading homework history...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="hw-history-container">
+        <ErrorResponse 
+          error={{ message: error }}
+          onRetry={() => {
+            setError(null);
+            // Retry loading the history
+            window.location.reload();
+          }}
+          onDismiss={() => {
+            setError(null);
+          }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="hw-history-container">
+      <div className="hw-history-header">
+        <h2>Homework Generation History</h2>
+        <div className="controls-row">
+          <div className="search-box">
+            <input
+              type="text"
+              placeholder="Search homework..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+          </div>
+          <div className="filters">
+            <select
+              value={filterGrade}
+              onChange={(e) => setFilterGrade(e.target.value)}
+              className="filter-select"
+            >
+              <option value="">All Grades</option>
+              {uniqueGrades.map(grade => (
+                <option key={grade} value={grade}>Grade {grade}</option>
+              ))}
+            </select>
+            <select
+              value={filterSubject}
+              onChange={(e) => setFilterSubject(e.target.value)}
+              className="filter-select"
+            >
+              <option value="">All Subjects</option>
+              {uniqueSubjects.map(subject => (
+                <option key={subject} value={subject}>{subject}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="table-container">
+        <table className="hw-history-table">
+          <thead>
+            <tr>
+              <th onClick={() => requestSort('title')} className="sortable">
+                Title {getSortIcon('title')}
+              </th>
+              <th onClick={() => requestSort('grade')} className="sortable">
+                Grade {getSortIcon('grade')}
+              </th>
+              <th onClick={() => requestSort('subject')} className="sortable">
+                Subject {getSortIcon('subject')}
+              </th>
+              <th onClick={() => requestSort('difficulty')} className="sortable">
+                Difficulty {getSortIcon('difficulty')}
+              </th>
+              <th onClick={() => requestSort('createdAt')} className="sortable">
+                Created {getSortIcon('createdAt')}
+              </th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredAndSortedData.length > 0 ? (
+              filteredAndSortedData.map((homework, index) => (
+                <tr key={homework.id || index} className="table-row">
+                  <td className="title-cell">{homework.title || 'Untitled'}</td>
+                  <td className="grade-cell">
+                    <span className="grade-badge">Grade {homework.grade}</span>
+                  </td>
+                  <td className="subject-cell">{homework.subject}</td>
+                  <td className="difficulty-cell">
+                    <span className={`difficulty-badge ${homework.difficulty?.toLowerCase()}`}>
+                      {homework.difficulty}
+                    </span>
+                  </td>
+                  <td className="date-cell">{formatDate(homework.createdAt)}</td>
+                  <td className="description-cell">
+                    <div className="description-text">
+                      {homework.description || 'No description available'}
+                    </div>
+                  </td>
+                  <td className="actions-cell">
+                    <button 
+                      className="action-btn view-btn"
+                      onClick={() => console.log('View homework:', homework.id)}
+                    >
+                      View
+                    </button>
+                    <button 
+                      className="action-btn regenerate-btn"
+                      onClick={() => console.log('Regenerate homework:', homework.id)}
+                    >
+                      Regenerate
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="no-data">
+                  No homework history found matching your criteria.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="results-info">
+        Showing {filteredAndSortedData.length} of {homeworkHistory.length} homework assignments
+      </div>
+    </div>
+  );
+};
+
+export default HWHistory;

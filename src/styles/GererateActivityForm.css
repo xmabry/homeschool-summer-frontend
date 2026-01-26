@@ -95,6 +95,22 @@
   width: 100%;
 }
 
+/* Multi-select styles */
+.multi-select {
+  min-height: 120px;
+  padding: 8px;
+}
+
+.multi-select option {
+  padding: 4px 8px;
+  margin-bottom: 2px;
+}
+
+.multi-select option:checked {
+  background-color: #007bff;
+  color: white;
+}
+
 /* Submit Button */
 .submit-button {
   width: 100%;

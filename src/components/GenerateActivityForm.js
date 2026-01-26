@@ -2,16 +2,16 @@ import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import axios from 'axios';
-import './HomeschoolForm.css';
+import '../styles/GererateActivityForm.css';
+import ErrorResponse from './ErrorResponse';
 
-const HomeschoolForm = () => {
+const GenerateActivityForm = () => {
   const [formData, setFormData] = useState({
-    studentName: '',
     gradeLevel: '',
     subject: '',
     activityDate: new Date(),
-    description: '',
-    learningGoals: '',
+    prompt: '',
+    skills: [],
   });
 
   const [loading, setLoading] = useState(false);
@@ -25,7 +25,7 @@ const HomeschoolForm = () => {
     // Ensure REACT_APP_API_ENDPOINT is set in your environment (e.g., .env file).
     // eslint-disable-next-line no-console
     console.error(
-      'HomeschoolForm: REACT_APP_API_ENDPOINT is not set. ' +
+      'GenerateActivityForm: REACT_APP_API_ENDPOINT is not set. ' +
       'Please configure the API endpoint before using this form.'
     );
   }
@@ -52,21 +52,44 @@ const HomeschoolForm = () => {
     { value: 'math', label: 'Mathematics' },
     { value: 'science', label: 'Science' },
     { value: 'english', label: 'English/Language Arts' },
+    { value: 'finance', label: 'Finance' },
     { value: 'history', label: 'History/Social Studies' },
+    { value: 'coding', label: 'Coding/Computer Science' },
     { value: 'art', label: 'Art' },
     { value: 'music', label: 'Music' },
     { value: 'physical-ed', label: 'Physical Education' },
-    { value: 'foreign-language', label: 'Foreign Language' },
-    { value: 'other', label: 'Other' },
+    { value: 'geography', label: 'Geography' },
+    { value: 'spanish', label: 'Spanish' }
+  ];
+
+  const skills = [
+    { value: '', label: 'Select Skill' },
+    { value: 'critical-thinking', label: 'Critical Thinking' },
+    { value: 'problem-solving', label: 'Problem Solving' },
+    { value: 'creativity', label: 'Creativity' },
+    { value: 'collaboration', label: 'Collaboration' },
+    { value: 'communication', label: 'Communication' },
+    { value: 'leadership', label: 'Leadership' },
+    { value: 'time-management', label: 'Time Management' },
+    { value: 'adaptability', label: 'Adaptability' },
   ];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
+    // Handle multi-select for skills
+    if (name === 'skills') {
+      const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+      setFormData({
+        ...formData,
+        [name]: selectedOptions,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  }; 
 
   const handleDateChange = (date) => {
     setFormData({
@@ -95,7 +118,7 @@ const HomeschoolForm = () => {
       };
 
       // Call AWS API Gateway
-      const result = await axios.post(`${API_ENDPOINT}/activities`, payload, {
+      const result = await axios.post(`${API_ENDPOINT}/generate-hw`, payload, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -105,12 +128,11 @@ const HomeschoolForm = () => {
       
       // Reset form on success
       setFormData({
-        studentName: '',
-        gradeLevel: '',
+        gradeLevel: '', 
         subject: '',
         activityDate: new Date(),
-        description: '',
-        learningGoals: '',
+        prompt: '', 
+        skills: [],
       });
     } catch (err) {
       console.error('Error submitting form:', err);
@@ -130,19 +152,6 @@ const HomeschoolForm = () => {
       <p className="subtitle">Record your summer learning activities</p>
 
       <form onSubmit={handleSubmit} className="homeschool-form">
-        {/* Student Name Input */}
-        <div className="form-group">
-          <label htmlFor="studentName">Student Name *</label>
-          <input
-            type="text"
-            id="studentName"
-            name="studentName"
-            value={formData.studentName}
-            onChange={handleInputChange}
-            required
-            placeholder="Enter student name"
-          />
-        </div>
 
         {/* Grade Level Dropdown */}
         <div className="form-group">
@@ -195,31 +204,39 @@ const HomeschoolForm = () => {
           />
         </div>
 
-        {/* Activity Description - Long Text Box */}
+        {/* Prompt - Long Text Box */}
         <div className="form-group">
-          <label htmlFor="description">Activity Description *</label>
+          <label htmlFor="prompt">Prompt*</label>
           <textarea
-            id="description"
-            name="description"
-            value={formData.description}
+            id="prompt"
+            name="prompt"
+            value={formData.prompt}
             onChange={handleInputChange}
             required
-            placeholder="Describe the learning activity in detail..."
+            placeholder="Describe the learning activity in detail in the form of a prompt for Generative AI foundation model"
             rows="6"
           />
         </div>
 
-        {/* Learning Goals - Long Text Box */}
+        {/*  Skills multi-select */}
         <div className="form-group">
-          <label htmlFor="learningGoals">Learning Goals</label>
-          <textarea
-            id="learningGoals"
-            name="learningGoals"
-            value={formData.learningGoals}
+          <label htmlFor="skills">Skills/Learning Objectives</label>
+          <select
+            id="skills"
+            name="skills"
+            value={formData.skills}
             onChange={handleInputChange}
-            placeholder="What were the learning objectives? (Optional)"
-            rows="4"
-          />
+            multiple
+            size="5"
+            className="multi-select"
+          >
+            {skills.slice(1).map((skill) => ( // Fixed: Skip the first "Select Skill" option for multi-select
+              <option key={skill.value} value={skill.value}>
+                {skill.label}
+              </option>
+            ))}
+          </select>
+          <small className="help-text">Hold Ctrl (Cmd on Mac) to select multiple skills</small>
         </div>
 
         {/* Submit Button */}
@@ -237,20 +254,22 @@ const HomeschoolForm = () => {
           <pre>{JSON.stringify(response, null, 2)}</pre>
         </div>
       )}
-
-      {/* Error Message */}
-      {error && (
-        <div className="error-message">
-          <h3>⚠ Error</h3>
-          <p>{error}</p>
-          <p className="help-text">
-            To connect to AWS API Gateway, set the REACT_APP_API_ENDPOINT 
-            environment variable in your .env file.
-          </p>
-        </div>
-      )}
+      
+      <ErrorResponse 
+        error={error ? { 
+          message: 'Failed to submit activity',
+          details: error
+        } : null}
+        onRetry={() => {
+          setError(null);
+          handleSubmit(new Event('submit'));
+        }}
+        onDismiss={() => {
+          setError(null);
+        }}
+      />
     </div>
   );
 };
 
-export default HomeschoolForm;
+export default GenerateActivityForm;
