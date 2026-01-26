@@ -1,39 +1,37 @@
 import { render, screen } from '@testing-library/react';
+import { vi } from 'vitest';
 import App from './App';
-import { AuthProvider } from 'react-oidc-context';
 
 // Mock the child components that use axios
-jest.mock('./components/GenerateActivityForm', () => {
-  return function MockGenerateActivityForm() {
+vi.mock('./components/GenerateActivityForm', () => ({
+  default: function MockGenerateActivityForm() {
     return <div>Generate Activity Form</div>;
-  };
-});
-
-jest.mock('./components/HWHistory', () => {
-  return function MockHWHistory() {
-    return <div>HW History</div>;
-  };
-});
-
-// Mock the useAuth hook
-jest.mock('react-oidc-context', () => ({
-  ...jest.requireActual('react-oidc-context'),
-  useAuth: jest.fn(),
+  }
 }));
 
-const { useAuth } = require('react-oidc-context');
+vi.mock('./components/HWHistory', () => ({
+  default: function MockHWHistory() {
+    return <div>HW History</div>;
+  }
+}));
+
+// Mock the useAuth hook
+const mockUseAuth = vi.fn();
+vi.mock('react-oidc-context', () => ({
+  useAuth: () => mockUseAuth(),
+}));
 
 describe('App Component', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders sign in button when not authenticated', () => {
-    useAuth.mockReturnValue({
+    mockUseAuth.mockReturnValue({
       isLoading: false,
       isAuthenticated: false,
       error: null,
-      signinRedirect: jest.fn(),
+      signinRedirect: vi.fn(),
     });
 
     render(<App />);
@@ -42,7 +40,7 @@ describe('App Component', () => {
   });
 
   test('renders loading state', () => {
-    useAuth.mockReturnValue({
+    mockUseAuth.mockReturnValue({
       isLoading: true,
       isAuthenticated: false,
       error: null,
@@ -54,7 +52,7 @@ describe('App Component', () => {
   });
 
   test('renders authenticated header and navigation when authenticated', () => {
-    useAuth.mockReturnValue({
+    mockUseAuth.mockReturnValue({
       isLoading: false,
       isAuthenticated: true,
       error: null,
@@ -64,7 +62,7 @@ describe('App Component', () => {
         },
         access_token: 'mock-token',
       },
-      removeUser: jest.fn(),
+      removeUser: vi.fn(),
     });
 
     render(<App />);
@@ -86,7 +84,7 @@ describe('App Component', () => {
   });
 
   test('renders error message when authentication error occurs', () => {
-    useAuth.mockReturnValue({
+    mockUseAuth.mockReturnValue({
       isLoading: false,
       isAuthenticated: false,
       error: { message: 'Authentication failed' },
