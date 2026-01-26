@@ -27,6 +27,8 @@ The app now uses AWS Cognito for authentication. You must configure these enviro
    REACT_APP_COGNITO_USER_POOL_ID=your-user-pool-id
    REACT_APP_COGNITO_USER_POOL_CLIENT_ID=your-client-id
    REACT_APP_AWS_REGION=us-east-1
+   REACT_APP_COGNITO_DOMAIN=your-cognito-domain             # e.g. https://your-domain.auth.us-east-1.amazoncognito.com
+   REACT_APP_LOGOUT_URI=http://localhost:3000                # redirect URI after logout
    
    # AWS API Gateway Configuration (Optional)
    REACT_APP_API_ENDPOINT=https://your-api-gateway-url.amazonaws.com/prod
