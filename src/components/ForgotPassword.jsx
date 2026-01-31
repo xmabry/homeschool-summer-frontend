@@ -41,7 +41,7 @@ const ForgotPassword = ({ onClose, onBack }) => {
         
         {!isSuccess ? (
           <form onSubmit={handleSubmit} className="forgot-password-form">
-            <p>Enter your email address and we'll send you a link to reset your password.</p>
+            <p>Enter your email address and we&apos;ll send you a link to reset your password.</p>
             
             <div className="form-group">
               <label htmlFor="email">Email Address</label>

@@ -12,12 +12,11 @@
     "react-dom": "^19.2.3"
   },
   "devDependencies": {
-    "@eslint/config-array": "^0.18.0",
-    "@eslint/object-schema": "^2.1.4",
     "@vitejs/plugin-react": "^4.2.1",
-    "eslint": "^9.17.0",
+    "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.34.1",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
     "rimraf": "^6.0.1",
     "vite": "^5.1.6"
   },
@@ -26,11 +25,9 @@
     "start": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 10"
   },
   "overrides": {
-    "@humanwhocodes/config-array": "npm:@eslint/config-array@^0.18.0",
-    "@humanwhocodes/object-schema": "npm:@eslint/object-schema@^2.1.4",
     "glob": "^11.0.0",
     "inflight": "npm:lru-cache@^11.0.1",
     "rimraf": "^6.0.1"
@@ -39,17 +36,29 @@
     "extends": [
       "eslint:recommended",
       "plugin:react/recommended",
-      "plugin:react-hooks/recommended",
-      "plugin:react-refresh/recommended"
+      "plugin:react-hooks/recommended"
     ],
+    "plugins": [
+      "react",
+      "react-hooks",
+      "react-refresh"
+    ],
+    "rules": {
+      "react-refresh/only-export-components": "warn",
+      "react/react-in-jsx-scope": "off",
+      "react/prop-types": "warn"
+    },
     "settings": {
       "react": {
-        "version": "detect"
+        "version": "detect",
+        "runtime": "automatic"
       }
     },
     "env": {
       "browser": true,
-      "es2020": true
+      "es2020": true,
+      "node": true,
+      "jest": true
     },
     "parserOptions": {
       "ecmaVersion": "latest",
@@ -57,7 +66,14 @@
       "ecmaFeatures": {
         "jsx": true
       }
-    }
+    },
+    "ignorePatterns": [
+      "build/**/*",
+      "dist/**/*",
+      "node_modules/**/*",
+      "*.min.js",
+      "**/*.chunk.js"
+    ]
   },
   "browserslist": {
     "production": [

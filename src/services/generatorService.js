@@ -33,13 +33,13 @@ export const getHistory = async (filters = {}) => {
     const token = (await Auth.currentSession()).getIdToken().getJwtToken();
     const user = await Auth.currentAuthenticatedUser();
     
-    // Build query parameters
+    // Build query parameters if filters are provided
     const queryParams = new URLSearchParams({
       userId: user.attributes.sub,
       ...filters
     });
     
-    const response = await fetch(`${import.meta.env.REACT_APP_API_ENDPOINT}/activities/history`, {
+    const response = await fetch(`${import.meta.env.REACT_APP_API_ENDPOINT}/activities/history?${queryParams}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

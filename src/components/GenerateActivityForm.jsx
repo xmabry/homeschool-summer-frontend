@@ -23,7 +23,6 @@ const GenerateActivityForm = () => {
   if (!API_ENDPOINT) {
     // In development, surface a clear configuration error.
     // Ensure REACT_APP_API_ENDPOINT is set in your environment (e.g., .env file).
-    // eslint-disable-next-line no-console
     console.error(
       'GenerateActivityForm: REACT_APP_API_ENDPOINT is not set. ' +
       'Please configure the API endpoint before using this form.'
