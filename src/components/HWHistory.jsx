@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Auth } from 'aws-amplify';
 import '../styles/HWHistory.css';
 import ErrorResponse from './ErrorResponse';
+import { getHistory } from '../services/generatorService';
+import { downloadMultiplePDFs } from '../services/downloadService';
 
 const HWHistory = () => {
   const [homeworkHistory, setHomeworkHistory] = useState([]);
@@ -10,19 +13,16 @@ const HWHistory = () => {
   const [filterGrade, setFilterGrade] = useState('');
   const [filterSubject, setFilterSubject] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedItems, setSelectedItems] = useState(new Set());
+  const [downloading, setDownloading] = useState(false);
 
-  // Fetch homework history from DynamoDB
+  // Fetch homework history from API
   useEffect(() => {
     const fetchHomeworkHistory = async () => {
       try {
         setLoading(true);
-        // Replace with your actual API endpoint
-        const response = await fetch('/api/homework-history');
-        if (!response.ok) {
-          throw new Error('Failed to fetch homework history');
-        }
-        const data = await response.json();
-        setHomeworkHistory(data);
+        const data = await getHistory();
+        setHomeworkHistory(data.activities || data);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -32,6 +32,69 @@ const HWHistory = () => {
 
     fetchHomeworkHistory();
   }, []);
+
+  // Handle item selection (max 3 items)
+  const handleItemSelect = (itemId) => {
+    setSelectedItems(prev => {
+      const newSelected = new Set(prev);
+      if (newSelected.has(itemId)) {
+        newSelected.delete(itemId);
+      } else if (newSelected.size < 3) {
+        newSelected.add(itemId);
+      }
+      return newSelected;
+    });
+  };
+
+  // Handle bulk download of selected items
+  const handleDownloadSelected = async () => {
+    if (selectedItems.size === 0) {
+      alert('Please select at least one item to download.');
+      return;
+    }
+
+    try {
+      setDownloading(true);
+      const user = await Auth.currentAuthenticatedUser();
+      const token = (await Auth.currentSession()).getIdToken().getJwtToken();
+
+      const selectedHomework = homeworkHistory.filter(item => 
+        selectedItems.has(item.id)
+      );
+
+      const downloadRequests = selectedHomework.map(homework => ({
+        key: homework.pdfKey || homework.s3Key || `homework-${homework.id}.pdf`,
+        userId: user.attributes.sub,
+        token: token,
+        bucketName: null // Use default bucket
+      }));
+
+      const results = await downloadMultiplePDFs(downloadRequests);
+      
+      const successful = results.filter(r => r.success).length;
+      const failed = results.filter(r => !r.success).length;
+      
+      if (failed > 0) {
+        alert(`Downloaded ${successful} files successfully. ${failed} downloads failed.`);
+      } else {
+        alert(`Successfully downloaded ${successful} files.`);
+      }
+      
+      // Clear selection after download
+      setSelectedItems(new Set());
+      
+    } catch (err) {
+      console.error('Download error:', err);
+      alert(`Download failed: ${err.message}`);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  // Clear all selections
+  const handleClearSelection = () => {
+    setSelectedItems(new Set());
+  };
 
   // Sorting function
   const requestSort = (key) => {
@@ -131,6 +194,26 @@ const HWHistory = () => {
     <div className="hw-history-container">
       <div className="hw-history-header">
         <h2>Homework Generation History</h2>
+        {selectedItems.size > 0 && (
+          <div className="selection-controls">
+            <span className="selection-info">
+              {selectedItems.size} of 3 items selected
+            </span>
+            <button 
+              className="download-selected-btn"
+              onClick={handleDownloadSelected}
+              disabled={downloading || selectedItems.size === 0}
+            >
+              {downloading ? 'Downloading...' : `Download Selected (${selectedItems.size})`}
+            </button>
+            <button 
+              className="clear-selection-btn"
+              onClick={handleClearSelection}
+            >
+              Clear Selection
+            </button>
+          </div>
+        )}
         <div className="controls-row">
           <div className="search-box">
             <input
@@ -170,6 +253,7 @@ const HWHistory = () => {
         <table className="hw-history-table">
           <thead>
             <tr>
+              <th className="select-column">Select</th>
               <th onClick={() => requestSort('title')} className="sortable">
                 Title {getSortIcon('title')}
               </th>
@@ -191,9 +275,22 @@ const HWHistory = () => {
           </thead>
           <tbody>
             {filteredAndSortedData.length > 0 ? (
-              filteredAndSortedData.map((homework, index) => (
-                <tr key={homework.id || index} className="table-row">
-                  <td className="title-cell">{homework.title || 'Untitled'}</td>
+              filteredAndSortedData.map((homework, index) => {
+                const isSelected = selectedItems.has(homework.id);
+                const canSelect = selectedItems.size < 3 || isSelected;
+                
+                return (
+                  <tr key={homework.id || index} className={`table-row ${isSelected ? 'selected' : ''}`}>
+                    <td className="select-cell">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => handleItemSelect(homework.id)}
+                        disabled={!canSelect}
+                        className="select-checkbox"
+                      />
+                    </td>
+                    <td className="title-cell">{homework.title || 'Untitled'}</td>
                   <td className="grade-cell">
                     <span className="grade-badge">Grade {homework.gradeLevel}</span>
                   </td>
@@ -224,10 +321,11 @@ const HWHistory = () => {
                     </button>
                   </td>
                 </tr>
-              ))
+                );
+              })
             ) : (
               <tr>
-                <td colSpan="7" className="no-data">
+                <td colSpan="8" className="no-data">
                   No homework history found matching your criteria.
                 </td>
               </tr>

@@ -20,6 +20,100 @@
   font-weight: 600;
 }
 
+/* Selection Controls */
+.selection-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  padding: 10px 15px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.selection-info {
+  font-size: 14px;
+  color: #495057;
+  font-weight: 500;
+}
+
+.download-selected-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.download-selected-btn:hover:not(:disabled) {
+  background-color: #218838;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.download-selected-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.clear-selection-btn {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.clear-selection-btn:hover {
+  background-color: #5a6268;
+  transform: translateY(-1px);
+}
+
+/* Table Selection Styles */
+.select-column {
+  width: 50px;
+  text-align: center;
+  background-color: #f8f9fa;
+  padding: 8px 4px;
+}
+
+.select-cell {
+  width: 50px;
+  text-align: center;
+  padding: 8px 4px;
+}
+
+.select-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #28a745;
+}
+
+.select-checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Selected Row Highlighting */
+.table-row.selected {
+  background-color: #e8f5e8;
+  border-left: 3px solid #28a745;
+}
+
+.table-row.selected td {
+  background-color: rgba(40, 167, 69, 0.05);
+}
+
 .controls-row {
   display: flex;
   justify-content: space-between;

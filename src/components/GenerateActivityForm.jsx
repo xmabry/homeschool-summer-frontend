@@ -205,7 +205,7 @@ const GenerateActivityForm = () => {
         </div>
 
         {/* Prompt - Long Text Box */}
-        <div className="form-group">
+{/*         <div className="form-group">
           <label htmlFor="prompt">Prompt*</label>
           <textarea
             id="prompt"
@@ -216,7 +216,7 @@ const GenerateActivityForm = () => {
             placeholder="Describe the learning activity in detail in the form of a prompt for Generative AI foundation model"
             rows="6"
           />
-        </div>
+        </div> */}
 
         {/*  Skills multi-select */}
         <div className="form-group">
