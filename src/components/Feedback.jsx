@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import '../styles/Feedback.css';
 import ErrorResponse from './ErrorResponse';
+import { submitFeedback } from '../services/generatorService';
 
 const Feedback = () => {
   const [formData, setFormData] = useState({
@@ -11,12 +12,6 @@ const Feedback = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
-
-  // Get API endpoint from environment variables
-  const API_ENDPOINT = import.meta.env.VITE_FEEDBACK_API_ENDPOINT || 
-                      import.meta.env.REACT_APP_FEEDBACK_API_ENDPOINT ||
-                      import.meta.env.VITE_API_ENDPOINT ||
-                      import.meta.env.REACT_APP_API_ENDPOINT;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -48,27 +43,17 @@ const Feedback = () => {
     }
 
     try {
-      const payload = {
+      const result = await submitFeedback({
         name: formData.name.trim(),
         email: formData.email.trim(),
-        feedback: formData.feedback.trim(),
-        timestamp: new Date().toISOString()
-      };
-
-      const response = await fetch(`${API_ENDPOINT}/feedback`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
+        feedback: formData.feedback.trim()
       });
 
-      if (response.ok) {
+      if (result.success) {
         setSuccess(true);
         setFormData({ name: '', email: '', feedback: '' });
       } else {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Server error: ${response.status}`);
+        throw new Error(result.error || 'Failed to submit feedback');
       }
     } catch (err) {
       console.error('Feedback submission error:', err);
