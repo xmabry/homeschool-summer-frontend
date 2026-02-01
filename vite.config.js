@@ -17,7 +17,7 @@ export default defineConfig({
     global: 'globalThis',
   },
   // Handle environment variables
-  envPrefix: 'REACT_APP_',
+  envPrefix: ['VITE_', 'REACT_APP_'],
   // Ensure .jsx files are handled properly
   esbuild: {
     loader: 'jsx',

@@ -27,13 +27,6 @@ const Welcome = () => {
       console.error('- VITE_COGNITO_CLIENT_ID');
       console.error('- VITE_AWS_REGION (optional, defaults to us-east-1)');
       console.error('- VITE_COGNITO_REDIRECT_URI (optional, defaults to current origin)');
-      console.error('');
-      console.error('Or for Create React App:');
-      console.error('- REACT_APP_COGNITO_DOMAIN');
-      console.error('- REACT_APP_COGNITO_CLIENT_ID');
-      console.error('- REACT_APP_AWS_REGION (optional, defaults to us-east-1)');
-      console.error('- REACT_APP_COGNITO_REDIRECT_URI (optional, defaults to current origin)');
-      console.error('');
       console.error('Current values:');
       console.error('Domain:', cognitoConfig.domain);
       console.error('Client ID:', cognitoConfig.clientId);
@@ -43,10 +36,10 @@ const Welcome = () => {
     }
 
     // Build Cognito hosted UI login URL
-    const loginUrl = `https://${cognitoConfig.domain}.auth.${cognitoConfig.region}.amazoncognito.com/login?` +
+    const loginUrl = `https://${cognitoConfig.domain}/login?` +
       `client_id=${cognitoConfig.clientId}&` +
       `response_type=code&` +
-      `scope=email+openid+profile&` +
+      `scope=email+openid+phone+profile&` +
       `redirect_uri=${encodeURIComponent(cognitoConfig.redirectUri)}`;
 
     // Redirect to Cognito login page
