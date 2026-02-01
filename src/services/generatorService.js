@@ -5,7 +5,7 @@ export const generateActivity = async (activityData) => {
     const token = (await Auth.currentSession()).getIdToken().getJwtToken();
     const user = await Auth.currentAuthenticatedUser();
     
-    const response = await fetch(`${import.meta.env.REACT_APP_API_ENDPOINT}/activities/generate`, {
+    const response = await fetch(`${import.meta.env.REACT_APP_API_ENDPOINT}/generate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

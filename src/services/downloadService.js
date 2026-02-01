@@ -1,6 +1,3 @@
-// Example usage for the S3 Downloader Lambda function
-// Add this to your existing apiService.js or create a new downloadService.js
-
 /**
  * Download a PDF file from S3 using the downloader Lambda
  * @param {string} pdfKey - The S3 key/path to the PDF file
