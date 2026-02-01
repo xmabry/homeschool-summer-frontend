@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import '../styles/GererateActivityForm.css';
 import ErrorResponse from './ErrorResponse';
+import { generateActivity } from '../services/generatorService';
 
 const GenerateActivityForm = () => {
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [formData, setFormData] = useState({
     gradeLevel: '',
     subject: '',
-    activityDate: new Date(),
     prompt: '',
     skills: [],
   });
@@ -18,17 +16,6 @@ const GenerateActivityForm = () => {
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
-
-  // Configuration for AWS API Gateway
-  const API_ENDPOINT = import.meta.env.REACT_APP_API_ENDPOINT;
-  if (!API_ENDPOINT) {
-    // In development, surface a clear configuration error.
-    // Ensure REACT_APP_API_ENDPOINT is set in your environment (e.g., .env file).
-    console.error(
-      'GenerateActivityForm: REACT_APP_API_ENDPOINT is not set. ' +
-      'Please configure the API endpoint before using this form.'
-    );
-  }
 
   const gradeLevels = [
     { value: '', label: 'Select Grade Level' },
@@ -91,60 +78,75 @@ const GenerateActivityForm = () => {
     }
   }; 
 
-  const handleDateChange = (date) => {
-    setFormData({
-      ...formData,
-      activityDate: date,
-    });
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Double-check authentication before submitting
+    if (!isAuthenticated) {
+      setError('Please log in to generate activities.');
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     setResponse(null);
 
     try {
       // Prepare data for API
-      // Note: `activityDate` captures when the learning activity occurred (user-selected),
-      // while `timestamp` records when this form was submitted. Both are sent so the
-      // backend can distinguish the event date from the submission/ingestion time.
+      // Use current timestamp as the activity date since user doesn't specify
       const payload = {
         ...formData,
-        // Date the activity actually took place (from the date picker)
-        activityDate: formData.activityDate.toISOString(),
         // ISO 8601 timestamp of when this record is submitted/created
         timestamp: new Date().toISOString(),
       };
 
-      // Call AWS API Gateway
-      const result = await axios.post(`${API_ENDPOINT}/generate-hw`, payload, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      // Call the authenticated generate activity service
+      const result = await generateActivity(payload);
 
-      setResponse(result.data);
+      setResponse(result);
       
       // Reset form on success
       setFormData({
         gradeLevel: '', 
         subject: '',
-        activityDate: new Date(),
         prompt: '', 
         skills: [],
       });
     } catch (err) {
       console.error('Error submitting form:', err);
-      setError(
-        err.response?.data?.message || 
-        err.message || 
-        'Failed to submit activity. Please check your API endpoint configuration.'
-      );
+      if (err.message.includes('Authentication failed')) {
+        setError('Please log in again to generate activities.');
+      } else {
+        setError(
+          err.message || 
+          'Failed to generate activity. Please try again.'
+        );
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="homeschool-form-container">
+        <div className="loading-spinner">Loading...</div>
+      </div>
+    );
+  }
+
+  // Require authentication to access the form
+  if (!isAuthenticated) {
+    return (
+      <div className="homeschool-form-container">
+        <div className="auth-required">
+          <h3>Authentication Required</h3>
+          <p>Please log in to generate homeschool activities.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="homeschool-form-container">
@@ -187,21 +189,6 @@ const GenerateActivityForm = () => {
               </option>
             ))}
           </select>
-        </div>
-
-        {/* Date Picker */}
-        <div className="form-group">
-          <label htmlFor="activityDate">Activity Date *</label>
-          <DatePicker
-            id="activityDate"
-            selected={formData.activityDate}
-            onChange={handleDateChange}
-            dateFormat="MMMM d, yyyy"
-            className="date-picker-input"
-            required
-            aria-label="Activity date"
-            aria-required="true"
-          />
         </div>
 
         {/* Prompt - Long Text Box */}
@@ -257,12 +244,14 @@ const GenerateActivityForm = () => {
       
       <ErrorResponse 
         error={error ? { 
-          message: 'Failed to submit activity',
+          message: 'Failed to generate activity',
           details: error
         } : null}
         onRetry={() => {
-          setError(null);
-          handleSubmit(new Event('submit'));
+          if (isAuthenticated) {
+            setError(null);
+            handleSubmit(new Event('submit'));
+          }
         }}
         onDismiss={() => {
           setError(null);

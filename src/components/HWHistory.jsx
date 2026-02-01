@@ -4,8 +4,10 @@ import { useAuth } from '../contexts/AuthContext';
 import ErrorResponse from './ErrorResponse';
 import { getHistory } from '../services/generatorService';
 import { downloadMultiplePDFs } from '../services/downloadService';
+import { fetchAuthSession, getCurrentUser } from 'aws-amplify/auth';
 
 const HWHistory = () => {
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [homeworkHistory, setHomeworkHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,22 +18,41 @@ const HWHistory = () => {
   const [selectedItems, setSelectedItems] = useState(new Set());
   const [downloading, setDownloading] = useState(false);
 
-  // Fetch homework history from API
+  // Fetch homework history from API - only when user is authenticated
   useEffect(() => {
     const fetchHomeworkHistory = async () => {
+      // Don't fetch if auth is still loading or user is not authenticated
+      if (authLoading || !isAuthenticated) {
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
+        setError(null);
+        
+        // Get user-specific history through the authorized service
         const data = await getHistory();
-        setHomeworkHistory(data.activities || data);
+        
+        // Ensure we only display data that belongs to the authenticated user
+        const userHistory = Array.isArray(data.activities) ? data.activities : 
+                           Array.isArray(data) ? data : [];
+        
+        setHomeworkHistory(userHistory);
       } catch (err) {
-        setError(err.message);
+        console.error('Error fetching homework history:', err);
+        if (err.message.includes('Authentication failed')) {
+          setError('Please log in again to view your homework history.');
+        } else {
+          setError(err.message || 'Failed to load homework history.');
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchHomeworkHistory();
-  }, []);
+  }, [isAuthenticated, authLoading]);
 
   // Handle item selection (max 3 items)
   const handleItemSelect = (itemId) => {
@@ -55,8 +76,18 @@ const HWHistory = () => {
 
     try {
       setDownloading(true);
-      const user = await Auth.currentAuthenticatedUser();
-      const token = (await Auth.currentSession()).getIdToken().getJwtToken();
+      
+      // Get current user and auth session using the updated Amplify v6 API
+      const [currentUser, session] = await Promise.all([
+        getCurrentUser(),
+        fetchAuthSession()
+      ]);
+      
+      const token = session.tokens?.idToken?.toString();
+      
+      if (!token) {
+        throw new Error('User is not authenticated');
+      }
 
       const selectedHomework = homeworkHistory.filter(item => 
         selectedItems.has(item.id)
@@ -64,7 +95,7 @@ const HWHistory = () => {
 
       const downloadRequests = selectedHomework.map(homework => ({
         key: homework.pdfKey || homework.s3Key || `homework-${homework.id}.pdf`,
-        userId: user.attributes.sub,
+        userId: currentUser.userId,
         token: token,
         bucketName: null // Use default bucket
       }));
@@ -164,10 +195,21 @@ const HWHistory = () => {
     });
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="hw-history-container">
         <div className="loading-spinner">Loading homework history...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="hw-history-container">
+        <div className="auth-required">
+          <h3>Authentication Required</h3>
+          <p>Please log in to view your homework history.</p>
+        </div>
       </div>
     );
   }
@@ -179,8 +221,10 @@ const HWHistory = () => {
           error={{ message: error }}
           onRetry={() => {
             setError(null);
-            // Retry loading the history
-            window.location.reload();
+            // Only retry if user is authenticated
+            if (isAuthenticated) {
+              window.location.reload();
+            }
           }}
           onDismiss={() => {
             setError(null);
