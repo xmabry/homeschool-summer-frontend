@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 import '../styles/GererateActivityForm.css';
 import ErrorResponse from './ErrorResponse';
 

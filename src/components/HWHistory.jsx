@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Auth } from 'aws-amplify';
 import '../styles/HWHistory.css';
+import { useAuth } from '../contexts/AuthContext';
 import ErrorResponse from './ErrorResponse';
 import { getHistory } from '../services/generatorService';
 import { downloadMultiplePDFs } from '../services/downloadService';
