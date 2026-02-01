@@ -3,11 +3,13 @@
 import { useState } from "react";
 import GenerateActivityForm from "./components/GenerateActivityForm.jsx";
 import HWHistory from "./components/HWHistory.jsx";
+import Welcome from "./components/Welcome.jsx";
+import Feedback from "./components/Feedback.jsx";
 import "./styles/App.css";
 
 function App() {
-  const [currentView, setCurrentView] = useState('generate'); // 'generate' or 'history'
-  const [isAuthenticated, setIsAuthenticated] = useState(true); // Simplified auth state
+  const [currentView, setCurrentView] = useState('generate'); // 'generate', 'history', or 'feedback'
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Start with false to show Welcome page
 
   if (isAuthenticated) {
     return (
@@ -16,7 +18,13 @@ function App() {
           <h1>Homeschool Activity Generator</h1>
           <div className="user-info">
             <span>Hello, User</span>
-            <button onClick={() => setIsAuthenticated(false)} className="sign-out-btn">
+            <button onClick={() => {
+              // Redirect to feedback page before logging out
+              setCurrentView('feedback');
+              setTimeout(() => {
+                setIsAuthenticated(false);
+              }, 100); // Small delay to show feedback page first
+            }} className="sign-out-btn">
               Sign Out
             </button>
           </div>
@@ -35,6 +43,12 @@ function App() {
           >
             Activity History
           </button>
+          <button 
+            onClick={() => setCurrentView('feedback')}
+            className={`nav-btn ${currentView === 'feedback' ? 'active' : ''}`}
+          >
+            Feedback
+          </button>
         </nav>
         
         <main className="app-content">
@@ -44,16 +58,16 @@ function App() {
           {currentView === 'history' && (
             <HWHistory />
           )}
+          {currentView === 'feedback' && (
+            <Feedback />
+          )}
         </main>
       </div>
     );
   }
 
-  return (
-    <div>
-      <button onClick={() => setIsAuthenticated(true)}>Sign in</button>
-    </div>
-  );
+  // Show Welcome page when not authenticated
+  return <Welcome />;
 }
 
 export default App;
