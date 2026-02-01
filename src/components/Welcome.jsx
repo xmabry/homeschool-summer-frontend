@@ -4,21 +4,40 @@ import '../styles/Welcome.css';
 const Welcome = () => {
   const handleLogin = () => {
     // Get Cognito configuration from environment variables
+    // Support both VITE_ and REACT_APP_ prefixes for compatibility
     const cognitoConfig = {
-      domain: import.meta.env.REACT_APP_COGNITO_DOMAIN,
-      clientId: import.meta.env.REACT_APP_COGNITO_CLIENT_ID,
-      region: import.meta.env.REACT_APP_AWS_REGION || 'us-east-1',
-      redirectUri: import.meta.env.REACT_APP_COGNITO_REDIRECT_URI || 
+      domain: import.meta.env.VITE_COGNITO_DOMAIN || 
+              import.meta.env.REACT_APP_COGNITO_DOMAIN,
+      clientId: import.meta.env.VITE_COGNITO_CLIENT_ID || 
+                import.meta.env.REACT_APP_COGNITO_CLIENT_ID ||
+                import.meta.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID,
+      region: import.meta.env.VITE_AWS_REGION || 
+              import.meta.env.REACT_APP_AWS_REGION || 
+              'us-east-1',
+      redirectUri: import.meta.env.VITE_COGNITO_REDIRECT_URI || 
+                   import.meta.env.REACT_APP_COGNITO_REDIRECT_URI || 
                    window.location.origin
     };
 
     // Validate required environment variables
     if (!cognitoConfig.domain || !cognitoConfig.clientId) {
       console.error('Missing required Cognito configuration. Please ensure the following environment variables are set:');
-      console.error('-  REACT_APP_COGNITO_DOMAIN');
+      console.error('For Vite:');
+      console.error('- VITE_COGNITO_DOMAIN');
+      console.error('- VITE_COGNITO_CLIENT_ID');
+      console.error('- VITE_AWS_REGION (optional, defaults to us-east-1)');
+      console.error('- VITE_COGNITO_REDIRECT_URI (optional, defaults to current origin)');
+      console.error('');
+      console.error('Or for Create React App:');
+      console.error('- REACT_APP_COGNITO_DOMAIN');
       console.error('- REACT_APP_COGNITO_CLIENT_ID');
       console.error('- REACT_APP_AWS_REGION (optional, defaults to us-east-1)');
       console.error('- REACT_APP_COGNITO_REDIRECT_URI (optional, defaults to current origin)');
+      console.error('');
+      console.error('Current values:');
+      console.error('Domain:', cognitoConfig.domain);
+      console.error('Client ID:', cognitoConfig.clientId);
+      console.error('Region:', cognitoConfig.region);
       alert('Login configuration is missing. Please contact support.');
       return;
     }
@@ -55,7 +74,7 @@ const Welcome = () => {
             Personalized Homeschool Activity Generator
           </h2>
           <p className="hero-subtitle">
-            Create engaging, customized learning activities tailored to your child`&apos;s interests and educational needs
+            Create engaging, customized learning activities tailored to your child&apos;s interests and educational needs
           </p>
         </div>
 
@@ -76,7 +95,7 @@ const Welcome = () => {
             <div className="feature-card">
               <div className="feature-icon">⚡</div>
               <h3>AI-Powered Generation</h3>
-              <p>Advanced AI creates unique activities based on your child`&apos;s age, interests, and learning style</p>
+              <p>Advanced AI creates unique activities based on your child&apos;s age, interests, and learning style</p>
             </div>
 
             <div className="feature-card">
@@ -88,7 +107,7 @@ const Welcome = () => {
             <div className="feature-card">
               <div className="feature-icon">📈</div>
               <h3>Track Progress</h3>
-              <p>Keep a history of activities and monitor your child`&apos;s learning journey</p>
+              <p>Keep a history of activities and monitor your child&apos;s learning journey</p>
             </div>
 
             <div className="feature-card">

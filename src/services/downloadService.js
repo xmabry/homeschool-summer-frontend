@@ -1,14 +1,27 @@
+import cognitoService from './cognitoService';
+
 /**
  * Download a PDF file from S3 using the downloader Lambda
  * @param {string} pdfKey - The S3 key/path to the PDF file
- * @param {string} userId - The user ID for access validation
- * @param {string} token - The authentication token (JWT)
+ * @param {string} userId - Optional user ID (will get from auth if not provided)
+ * @param {string} token - Optional authentication token (will get from auth if not provided)
  * @param {string} bucketName - Optional bucket name (uses default if not provided)
  * @returns {Promise<void>} - Triggers browser download
  */
-export const downloadPDF = async (pdfKey, userId, token, bucketName = null) => {
+export const downloadPDF = async (pdfKey, userId = null, token = null, bucketName = null) => {
   try {
     console.log(`Initiating download for: ${pdfKey}`);
+    
+    // Get authentication info from CognitoService if not provided
+    if (!token || !userId) {
+      const userResult = await cognitoService.getCurrentUser();
+      if (!userResult.success) {
+        throw new Error('Authentication required. Please log in again.');
+      }
+      
+      userId = userId || userResult.user.userId;
+      token = token || cognitoService.getIdToken();
+    }
     
     if (!token) {
       throw new Error('Authentication token not found. Please log in again.');
@@ -25,7 +38,8 @@ export const downloadPDF = async (pdfKey, userId, token, bucketName = null) => {
     }
     
     // Call the downloader Lambda
-    const response = await fetch(`${import.meta.env.REACT_APP_API_ENDPOINT}/download?${params.toString()}`, {
+    const apiEndpoint = import.meta.env.VITE_API_ENDPOINT || import.meta.env.REACT_APP_API_ENDPOINT;
+    const response = await fetch(`${apiEndpoint}/download?${params.toString()}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -127,13 +141,24 @@ export const downloadMultiplePDFs = async (pdfList) => {
 /**
  * Get download URL without triggering download (useful for preview)
  * @param {string} pdfKey - The S3 key/path to the PDF file
- * @param {string} userId - The user ID for access validation
- * @param {string} token - The authentication token (JWT)
+ * @param {string} userId - Optional user ID (will get from auth if not provided)
+ * @param {string} token - Optional authentication token (will get from auth if not provided)
  * @param {string} bucketName - Optional bucket name
  * @returns {Promise<Object>} - Object with download URL and metadata
  */
-export const getDownloadURL = async (pdfKey, userId, token, bucketName = null) => {
+export const getDownloadURL = async (pdfKey, userId = null, token = null, bucketName = null) => {
   try {
+    // Get authentication info from CognitoService if not provided
+    if (!token || !userId) {
+      const userResult = await cognitoService.getCurrentUser();
+      if (!userResult.success) {
+        throw new Error('Authentication required. Please log in again.');
+      }
+      
+      userId = userId || userResult.user.userId;
+      token = token || cognitoService.getIdToken();
+    }
+    
     if (!token) {
       throw new Error('Authentication token not found');
     }
@@ -147,7 +172,8 @@ export const getDownloadURL = async (pdfKey, userId, token, bucketName = null) =
       params.append('bucket', bucketName);
     }
     
-    const response = await fetch(`${import.meta.env.REACT_APP_API_ENDPOINT}/activities?${params.toString()}`, {
+    const apiEndpoint = import.meta.env.VITE_API_ENDPOINT || import.meta.env.REACT_APP_API_ENDPOINT;
+    const response = await fetch(`${apiEndpoint}/activities?${params.toString()}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,

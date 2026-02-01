@@ -1,20 +1,20 @@
-import { fetchAuthSession, getCurrentUser } from 'aws-amplify/auth';
+import cognitoService from './cognitoService';
 
 export const generateActivity = async (activityData) => {
   try {
-    // Get current user and auth session from Cognito
-    const [user, session] = await Promise.all([
-      getCurrentUser(),
-      fetchAuthSession()
-    ]);
+    // Get current user info from Cognito service
+    const userResult = await cognitoService.getCurrentUser();
+    if (!userResult.success) {
+      throw new Error('User is not authenticated');
+    }
     
-    const token = session.tokens?.idToken?.toString();
-    
+    const token = cognitoService.getIdToken();
     if (!token) {
       throw new Error('User is not authenticated');
     }
     
-    const response = await fetch(`${import.meta.env.REACT_APP_API_ENDPOINT}/generate`, {
+    const apiEndpoint = import.meta.env.VITE_API_ENDPOINT || import.meta.env.REACT_APP_API_ENDPOINT;
+    const response = await fetch(`${apiEndpoint}/generate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -22,7 +22,7 @@ export const generateActivity = async (activityData) => {
       },
       body: JSON.stringify({
         ...activityData,
-        userId: user.userId
+        userId: userResult.user.userId
       })
     });
     
@@ -42,25 +42,25 @@ export const generateActivity = async (activityData) => {
 
 export const getHistory = async (filters = {}) => {
   try {
-    // Get current user and auth session from Cognito
-    const [user, session] = await Promise.all([
-      getCurrentUser(),
-      fetchAuthSession()
-    ]);
+    // Get current user info from Cognito service
+    const userResult = await cognitoService.getCurrentUser();
+    if (!userResult.success) {
+      throw new Error('User is not authenticated');
+    }
     
-    const token = session.tokens?.idToken?.toString();
-    
+    const token = cognitoService.getIdToken();
     if (!token) {
       throw new Error('User is not authenticated');
     }
     
     // Build query parameters if filters are provided
     const queryParams = new URLSearchParams({
-      userId: user.userId,
+      userId: userResult.user.userId,
       ...filters
     });
     
-    const response = await fetch(`${import.meta.env.REACT_APP_API_ENDPOINT}/activities/history?${queryParams}`, {
+    const apiEndpoint = import.meta.env.VITE_API_ENDPOINT || import.meta.env.REACT_APP_API_ENDPOINT;
+    const response = await fetch(`${apiEndpoint}/activities/history?${queryParams}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -84,18 +84,16 @@ export const getHistory = async (filters = {}) => {
 
 export const submitFeedback = async (feedbackData) => {
   try {
-    // Get current user and auth session from Cognito (optional for feedback)
+    // Get current user info from Cognito service (optional for feedback)
     let userId = null;
     let token = null;
     
     try {
-      const [user, session] = await Promise.all([
-        getCurrentUser(),
-        fetchAuthSession()
-      ]);
-      
-      userId = user.userId;
-      token = session.tokens?.idToken?.toString();
+      const userResult = await cognitoService.getCurrentUser();
+      if (userResult.success) {
+        userId = userResult.user.userId;
+        token = cognitoService.getIdToken();
+      }
     } catch (authError) {
       // User might not be authenticated for feedback - that's okay
       console.log('User not authenticated for feedback submission');
@@ -110,7 +108,8 @@ export const submitFeedback = async (feedbackData) => {
       headers['Authorization'] = `Bearer ${token}`;
     }
     
-    const response = await fetch(`${import.meta.env.REACT_APP_API_ENDPOINT}/feedback`, {
+    const apiEndpoint = import.meta.env.VITE_API_ENDPOINT || import.meta.env.REACT_APP_API_ENDPOINT;
+    const response = await fetch(`${apiEndpoint}/feedback`, {
       method: 'POST',
       headers,
       body: JSON.stringify({
