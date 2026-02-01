@@ -17,6 +17,30 @@ const HWHistory = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedItems, setSelectedItems] = useState(new Set());
   const [downloading, setDownloading] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const [userGroups, setUserGroups] = useState([]);
+
+  // Extract user groups from JWT token
+  const extractUserGroups = (token) => {
+    if (!token) return [];
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      const payload = JSON.parse(jsonPayload);
+      return payload['cognito:groups'] || [];
+    } catch (error) {
+      console.error('Error extracting user groups:', error);
+      return [];
+    }
+  };
+
+  // Check if user has sharing permissions (member or premium)
+  const canShare = useMemo(() => {
+    return userGroups.includes('member') || userGroups.includes('premium');
+  }, [userGroups]);
 
   // Fetch homework history from API - only when user is authenticated
   useEffect(() => {
@@ -53,6 +77,29 @@ const HWHistory = () => {
 
     fetchHomeworkHistory();
   }, [isAuthenticated, authLoading]);
+
+  // Extract user groups when user changes
+  useEffect(() => {
+    const extractGroups = async () => {
+      if (isAuthenticated && user) {
+        try {
+          const session = await fetchAuthSession();
+          const idToken = session?.tokens?.idToken?.toString();
+          if (idToken) {
+            const groups = extractUserGroups(idToken);
+            setUserGroups(groups);
+          }
+        } catch (error) {
+          console.error('Error extracting user groups:', error);
+          setUserGroups([]);
+        }
+      } else {
+        setUserGroups([]);
+      }
+    };
+
+    extractGroups();
+  }, [user, isAuthenticated]);
 
   // Handle item selection (max 3 items)
   const handleItemSelect = (itemId) => {
@@ -119,6 +166,74 @@ const HWHistory = () => {
       alert(`Download failed: ${err.message}`);
     } finally {
       setDownloading(false);
+    }
+  };
+
+  // Handle sharing of selected items
+  const handleShareSelected = async () => {
+    if (selectedItems.size === 0) {
+      alert('Please select at least one item to share.');
+      return;
+    }
+
+    try {
+      setSharing(true);
+      
+      // Get current user and auth session
+      const [currentUser, session] = await Promise.all([
+        getCurrentUser(),
+        fetchAuthSession()
+      ]);
+      
+      const token = session.tokens?.idToken?.toString();
+      
+      if (!token) {
+        throw new Error('User is not authenticated');
+      }
+
+      const selectedHomework = homeworkHistory.filter(item => 
+        selectedItems.has(item.id)
+      );
+
+      const apiEndpoint = import.meta.env.VITE_API_ENDPOINT || import.meta.env.REACT_APP_API_ENDPOINT;
+      
+      // Share each selected item
+      const sharePromises = selectedHomework.map(homework => 
+        fetch(`${apiEndpoint}/share`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            itemId: homework.id,
+            userId: currentUser.userId,
+            title: homework.title,
+            subject: homework.subject,
+            gradeLevel: homework.gradeLevel
+          })
+        })
+      );
+
+      const results = await Promise.allSettled(sharePromises);
+      
+      const successful = results.filter(r => r.status === 'fulfilled' && r.value.ok).length;
+      const failed = results.length - successful;
+      
+      if (failed > 0) {
+        alert(`Shared ${successful} items successfully. ${failed} items failed to share.`);
+      } else {
+        alert(`Successfully shared ${successful} item${successful === 1 ? '' : 's'}! They are now visible to all users.`);
+      }
+      
+      // Clear selection after sharing
+      setSelectedItems(new Set());
+      
+    } catch (err) {
+      console.error('Share error:', err);
+      alert(`Sharing failed: ${err.message}`);
+    } finally {
+      setSharing(false);
     }
   };
 
@@ -250,6 +365,15 @@ const HWHistory = () => {
             >
               {downloading ? 'Downloading...' : `Download Selected (${selectedItems.size})`}
             </button>
+            {canShare && (
+              <button 
+                className="share-selected-btn"
+                onClick={handleShareSelected}
+                disabled={sharing || selectedItems.size === 0}
+              >
+                {sharing ? 'Sharing...' : `Share Selected (${selectedItems.size})`}
+              </button>
+            )}
             <button 
               className="clear-selection-btn"
               onClick={handleClearSelection}

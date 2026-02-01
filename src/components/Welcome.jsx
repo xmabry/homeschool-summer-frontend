@@ -111,6 +111,70 @@ const Welcome = () => {
           </div>
         </div>
 
+        <div className="membership-tiers-section">
+          <h3>Choose Your Access Level</h3>
+          <p>Select the plan that best fits your homeschooling needs</p>
+          <div className="tiers-grid">
+            <div className="tier-card viewer">
+              <div className="tier-header">
+                <div className="tier-icon">👀</div>
+                <h4>Viewer</h4>
+              </div>
+              <div className="tier-features">
+                <ul>
+                  <li>Review previously generated content</li>
+                  <li>Browse shared activities</li>
+                  <li>Access to educational resources</li>
+                  <li>View activity templates</li>
+                </ul>
+                <div className="tier-limitation">
+                  <strong>No content generation</strong>
+                </div>
+              </div>
+            </div>
+
+            <div className="tier-card member">
+              <div className="tier-header">
+                <div className="tier-icon">⭐</div>
+                <h4>Member</h4>
+              </div>
+              <div className="tier-features">
+                <ul>
+                  <li>Generate up to 10 assignments per month</li>
+                  <li>Access to all subject areas</li>
+                  <li>Download PDF activities</li>
+                  <li>Track activity history</li>
+                  <li>Basic customization options</li>
+                </ul>
+                <div className="tier-highlight">
+                  <strong>Perfect for occasional use</strong>
+                </div>
+              </div>
+            </div>
+
+            <div className="tier-card premium popular">
+              <div className="tier-badge">Most Popular</div>
+              <div className="tier-header">
+                <div className="tier-icon">🚀</div>
+                <h4>Premium</h4>
+              </div>
+              <div className="tier-features">
+                <ul>
+                  <li>Generate up to 30 assignments per month</li>
+                  <li>Advanced AI customization</li>
+                  <li>Priority support</li>
+                  <li>Bulk download options</li>
+                  <li>Advanced reporting & analytics</li>
+                  <li>Early access to new features</li>
+                </ul>
+                <div className="tier-highlight">
+                  <strong>Ideal for active homeschoolers</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="how-it-works-section">
           <h3>How It Works</h3>
           <div className="steps">

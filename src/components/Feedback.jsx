@@ -7,7 +7,8 @@ const Feedback = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    feedback: ''
+    feedback: '',
+    pricePoint: ''
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -46,7 +47,8 @@ const Feedback = () => {
       const result = await submitFeedback({
         name: formData.name.trim(),
         email: formData.email.trim(),
-        feedback: formData.feedback.trim()
+        feedback: formData.feedback.trim(),
+        pricePoint: formData.pricePoint || null
       });
 
       if (result.success) {
@@ -64,7 +66,7 @@ const Feedback = () => {
   };
 
   const handleReset = () => {
-    setFormData({ name: '', email: '', feedback: '' });
+    setFormData({ name: '', email: '', feedback: '', pricePoint: '' });
     setError(null);
     setSuccess(false);
   };
@@ -139,6 +141,61 @@ const Feedback = () => {
               <div className="character-count">
                 {formData.feedback.length} characters
               </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="pricePoint">What do you think would be a fair annual price for unlimited access to this service?</label>
+              <div className="radio-group">
+                <div className="radio-option">
+                  <input
+                    type="radio"
+                    id="price-10-20"
+                    name="pricePoint"
+                    value="$10-$20/year"
+                    checked={formData.pricePoint === '$10-$20/year'}
+                    onChange={handleInputChange}
+                    disabled={loading}
+                  />
+                  <label htmlFor="price-10-20">$10-$20/year</label>
+                </div>
+                <div className="radio-option">
+                  <input
+                    type="radio"
+                    id="price-20-30"
+                    name="pricePoint"
+                    value="$20-$30/year"
+                    checked={formData.pricePoint === '$20-$30/year'}
+                    onChange={handleInputChange}
+                    disabled={loading}
+                  />
+                  <label htmlFor="price-20-30">$20-$30/year</label>
+                </div>
+                <div className="radio-option">
+                  <input
+                    type="radio"
+                    id="price-30-40"
+                    name="pricePoint"
+                    value="$30-$40/year"
+                    checked={formData.pricePoint === '$30-$40/year'}
+                    onChange={handleInputChange}
+                    disabled={loading}
+                  />
+                  <label htmlFor="price-30-40">$30-$40/year</label>
+                </div>
+                <div className="radio-option">
+                  <input
+                    type="radio"
+                    id="price-40-50"
+                    name="pricePoint"
+                    value="$40-$50/year"
+                    checked={formData.pricePoint === '$40-$50/year'}
+                    onChange={handleInputChange}
+                    disabled={loading}
+                  />
+                  <label htmlFor="price-40-50">$40-$50/year</label>
+                </div>
+              </div>
+              <small className="help-text">Optional - This helps us understand what pricing would be most accessible for homeschooling families</small>
             </div>
 
             <div className="form-actions">
