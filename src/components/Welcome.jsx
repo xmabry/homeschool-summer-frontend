@@ -119,6 +119,7 @@ const Welcome = () => {
               <div className="tier-header">
                 <div className="tier-icon">👀</div>
                 <h4>Viewer</h4>
+                <div className="tier-price">Free</div>
               </div>
               <div className="tier-features">
                 <ul>
@@ -137,14 +138,17 @@ const Welcome = () => {
               <div className="tier-header">
                 <div className="tier-icon">⭐</div>
                 <h4>Member</h4>
+                <div className="tier-price">$6<span className="price-period">/month</span></div>
               </div>
               <div className="tier-features">
                 <ul>
-                  <li>Generate up to 10 assignments per month</li>
+                  <li>Generate up to 40 assignments per month</li>
+                  <li>That is two (2) assignments per day on average</li>
                   <li>Access to all subject areas</li>
                   <li>Download PDF activities</li>
                   <li>Track activity history</li>
                   <li>Basic customization options</li>
+                  <li>Share activities with community</li>
                 </ul>
                 <div className="tier-highlight">
                   <strong>Perfect for occasional use</strong>
@@ -157,15 +161,17 @@ const Welcome = () => {
               <div className="tier-header">
                 <div className="tier-icon">🚀</div>
                 <h4>Premium</h4>
+                <div className="tier-price">$16<span className="price-period">/month</span></div>
               </div>
               <div className="tier-features">
                 <ul>
-                  <li>Generate up to 30 assignments per month</li>
-                  <li>Advanced AI customization</li>
+                  <li>Generate up to 100 assignments per month</li>
+                  <li>That is over five (5) assignments per day on average</li>
                   <li>Priority support</li>
                   <li>Bulk download options</li>
-                  <li>Advanced reporting & analytics</li>
                   <li>Early access to new features</li>
+                  <li>Share activities with community</li>
+                  <li>Unused credits roll over to next month</li>
                 </ul>
                 <div className="tier-highlight">
                   <strong>Ideal for active homeschoolers</strong>
@@ -214,7 +220,7 @@ const Welcome = () => {
 
         <div className="cta-section">
           <h3>Ready to Get Started?</h3>
-          <p>Join thousands of homeschooling families creating amazing learning experiences</p>
+          <p>Join me in creating amazing learning experiences for work from home and homeschooling parents</p>
           <button 
             className="cta-button"
             onClick={handleLogin}
