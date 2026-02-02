@@ -129,6 +129,183 @@
   line-height: 1.6;
 }
 
+/* Membership Tiers Section */
+.membership-tiers-section {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  margin: 2rem 0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.membership-tiers-section h3 {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #2d3748;
+}
+
+.membership-tiers-section p {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #4a5568;
+  margin-bottom: 3rem;
+}
+
+.tiers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.tier-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 2px solid #e2e8f0;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.tier-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.tier-card.popular {
+  border-color: #4299e1;
+  transform: scale(1.05);
+}
+
+.tier-card.popular:hover {
+  transform: scale(1.05) translateY(-4px);
+}
+
+.tier-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #4299e1, #3182ce);
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4);
+}
+
+.tier-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 1.5rem;
+}
+
+.tier-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.tier-header h4 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.tier-price {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #4299e1;
+  margin-top: 0.5rem;
+}
+
+.tier-price .price-period {
+  font-size: 1rem;
+  color: #718096;
+  font-weight: 500;
+}
+
+.tier-card.viewer .tier-price {
+  color: #48bb78;
+}
+
+.tier-card.member .tier-price {
+  color: #ed8936;
+}
+
+.tier-card.premium .tier-price {
+  color: #9f7aea;
+}
+
+.tier-features {
+  flex: 1;
+}
+
+.tier-features ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem 0;
+}
+
+.tier-features li {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f7fafc;
+  position: relative;
+  padding-left: 1.5rem;
+  color: #4a5568;
+  line-height: 1.5;
+}
+
+.tier-features li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #48bb78;
+  font-weight: 700;
+}
+
+.tier-features li:last-child {
+  border-bottom: none;
+}
+
+.tier-limitation {
+  background: #fed7d7;
+  color: #c53030;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  border: 1px solid #feb2b2;
+}
+
+.tier-highlight {
+  background: linear-gradient(135deg, #edf2f7, #e2e8f0);
+  color: #2d3748;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  border-left: 4px solid #4299e1;
+}
+
+.tier-card.viewer .tier-highlight {
+  border-left-color: #48bb78;
+}
+
+.tier-card.member .tier-highlight {
+  border-left-color: #ed8936;
+}
+
+.tier-card.premium .tier-highlight {
+  border-left-color: #9f7aea;
+}
+
 /* How It Works Section */
 .how-it-works-section {
   background: rgba(255, 255, 255, 0.95);
@@ -248,14 +425,28 @@
   }
 
   .features-section,
-  .how-it-works-section {
+  .how-it-works-section,
+  .membership-tiers-section {
     margin: 1rem 0;
     padding: 2rem 1rem;
   }
 
-  .feature-grid {
+  .feature-grid,
+  .tiers-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
+  }
+
+  .tier-card.popular {
+    transform: none;
+  }
+
+  .tier-card.popular:hover {
+    transform: translateY(-4px);
+  }
+
+  .tier-card {
+    padding: 1.5rem;
   }
 
   .steps {
@@ -278,8 +469,25 @@
   }
 
   .features-section,
-  .how-it-works-section {
+  .how-it-works-section,
+  .membership-tiers-section {
     border-radius: 12px;
     padding: 1.5rem 1rem;
+  }
+
+  .tiers-grid {
+    gap: 1rem;
+  }
+
+  .tier-card {
+    padding: 1.2rem;
+  }
+
+  .tier-price {
+    font-size: 1.5rem;
+  }
+
+  .membership-tiers-section h3 {
+    font-size: 1.5rem;
   }
 }
