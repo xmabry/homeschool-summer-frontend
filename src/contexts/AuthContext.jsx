@@ -93,6 +93,15 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   };
 
+  const refreshUser = async () => {
+    const result = await cognitoService.getCurrentUser();
+    if (result.success) {
+      setUser(result.user);
+      return true;
+    }
+    return false;
+  };
+
   const value = {
     user,
     loading,
@@ -102,6 +111,7 @@ export const AuthProvider = ({ children }) => {
     signup,
     confirmSignup,
     clearError,
+    refreshUser,
     isAuthenticated: !!user,
   };
 

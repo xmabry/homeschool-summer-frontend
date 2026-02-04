@@ -16,7 +16,7 @@ const HWHistory = () => {
   const [filterSubject, setFilterSubject] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedItems, setSelectedItems] = useState(new Set());
-  const [downloading, setDownloading] = useState(false);
+const [downloading, setDownloading] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [userGroups, setUserGroups] = useState([]);
 

@@ -16,14 +16,14 @@ const Welcome = () => {
               'us-east-1',
       redirectUri: import.meta.env.VITE_COGNITO_REDIRECT_URI || 
                    import.meta.env.REACT_APP_COGNITO_REDIRECT_URI || 
-                   window.location.origin
+                   `${window.location.origin}/history`
     };
 
     // Validate required environment variables
     if (!cognitoConfig.domain || !cognitoConfig.clientId) {
-      console.error('Missing required Cognito configuration. Please ensure the following environment variables are set:');
-      console.error('For Vite:');
-      console.error('- VITE_COGNITO_DOMAIN');
+      console.log('Missing required Cognito configuration. Please ensure the following environment variables are set:');
+      console.log('For Vite:');
+      console.log('- VITE_COGNITO_DOMAIN');
       console.error('- VITE_COGNITO_CLIENT_ID');
       console.error('- VITE_AWS_REGION (optional, defaults to us-east-1)');
       console.error('- VITE_COGNITO_REDIRECT_URI (optional, defaults to current origin)');
@@ -136,6 +136,7 @@ const Welcome = () => {
 
             <div className="tier-card member">
               <div className="tier-header">
+                <div className="tier-badge">Most Popular</div>
                 <div className="tier-icon">⭐</div>
                 <h4>Member</h4>
                 <div className="tier-price">$6<span className="price-period">/month</span></div>
@@ -157,7 +158,6 @@ const Welcome = () => {
             </div>
 
             <div className="tier-card premium popular">
-              <div className="tier-badge">Most Popular</div>
               <div className="tier-header">
                 <div className="tier-icon">🚀</div>
                 <h4>Premium</h4>
@@ -166,7 +166,7 @@ const Welcome = () => {
               <div className="tier-features">
                 <ul>
                   <li>Generate up to 100 assignments per month</li>
-                  <li>That is over five (5) assignments per day on average</li>
+                  <li>That is five (5) assignments per day on average</li>
                   <li>Priority support</li>
                   <li>Bulk download options</li>
                   <li>Early access to new features</li>
