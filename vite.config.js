@@ -6,11 +6,22 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
-    open: true
+    open: true,
+    // Enable history API fallback for client-side routing
+    historyApiFallback: true
   },
   build: {
     outDir: 'build',
-    sourcemap: true
+    sourcemap: true,
+    // Ensure proper handling of assets for SPA
+    assetsDir: 'static'
+  },
+  // Configure preview server for production testing
+  preview: {
+    port: 3000,
+    open: true,
+    // Enable history API fallback for production preview
+    historyApiFallback: true
   },
   define: {
     // Replace process.env with import.meta.env for Vite

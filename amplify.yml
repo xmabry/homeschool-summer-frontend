@@ -14,3 +14,14 @@ frontend:
   cache:
     paths:
       - node_modules/**/*
+  # Handle client-side routing for React Router
+  customHeaders:
+    - pattern: '**/*'
+      headers:
+        - key: 'Cache-Control'
+          value: 'no-cache'
+  # SPA redirect rules for React Router
+  rewrites:
+    - source: '/<*>'
+      target: '/index.html'
+      status: '200'

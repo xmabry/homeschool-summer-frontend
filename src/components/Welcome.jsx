@@ -1,51 +1,7 @@
 import React from 'react';
 import '../styles/Welcome.css';
 
-const Welcome = () => {
-  const handleLogin = () => {
-    // Get Cognito configuration from environment variables
-    // Support both VITE_ and REACT_APP_ prefixes for compatibility
-    const cognitoConfig = {
-      domain: import.meta.env.VITE_COGNITO_DOMAIN || 
-              import.meta.env.REACT_APP_COGNITO_DOMAIN,
-      clientId: import.meta.env.VITE_COGNITO_CLIENT_ID || 
-                import.meta.env.REACT_APP_COGNITO_CLIENT_ID ||
-                import.meta.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID,
-      region: import.meta.env.VITE_AWS_REGION || 
-              import.meta.env.REACT_APP_AWS_REGION || 
-              'us-east-1',
-      redirectUri: import.meta.env.VITE_COGNITO_REDIRECT_URI || 
-                   import.meta.env.REACT_APP_COGNITO_REDIRECT_URI || 
-                   `${window.location.origin}/history`
-    };
-
-    // Validate required environment variables
-    if (!cognitoConfig.domain || !cognitoConfig.clientId) {
-      console.log('Missing required Cognito configuration. Please ensure the following environment variables are set:');
-      console.log('For Vite:');
-      console.log('- VITE_COGNITO_DOMAIN');
-      console.error('- VITE_COGNITO_CLIENT_ID');
-      console.error('- VITE_AWS_REGION (optional, defaults to us-east-1)');
-      console.error('- VITE_COGNITO_REDIRECT_URI (optional, defaults to current origin)');
-      console.error('Current values:');
-      console.error('Domain:', cognitoConfig.domain);
-      console.error('Client ID:', cognitoConfig.clientId);
-      console.error('Region:', cognitoConfig.region);
-      alert('Login configuration is missing. Please contact support.');
-      return;
-    }
-
-    // Build Cognito hosted UI login URL
-    const loginUrl = `https://${cognitoConfig.domain}/login?` +
-      `client_id=${cognitoConfig.clientId}&` +
-      `response_type=code&` +
-      `scope=email+openid+phone+profile&` +
-      `redirect_uri=${encodeURIComponent(cognitoConfig.redirectUri)}`;
-
-    // Redirect to Cognito login page
-    window.location.href = loginUrl;
-  };
-
+const Welcome = ({ onLogin }) => {
   return (
     <div className="welcome-container">
       <header className="welcome-header">
@@ -53,7 +9,7 @@ const Welcome = () => {
           <h1 className="site-title">Mabry Education</h1>
           <button 
             className="login-button"
-            onClick={handleLogin}
+            onClick={onLogin}
             aria-label="Login to your account"
           >
             Login
@@ -72,29 +28,30 @@ const Welcome = () => {
         </div>
 
         <div className="features-section">
-          <div className="feature-grid">
-            <div className="feature-card">
-              <div className="feature-icon">📚</div>
-              <h3>Curriculum-Aligned</h3>
-              <p>Activities designed to support your homeschool curriculum and learning objectives</p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon">🎨</div>
-              <h3>Creative & Interactive</h3>
-              <p>Engaging activities that combine learning with creativity and hands-on experiences</p>
-            </div>
-
+          <h3>Why Choose Our Activity Generator?</h3>
+          <div className="features-grid">
             <div className="feature-card">
               <div className="feature-icon">⚡</div>
-              <h3>AI-Powered Generation</h3>
-              <p>Advanced AI creates unique activities based on your child&apos;s age, interests, and learning style</p>
+              <h3>Instant Generation</h3>
+              <p>Create personalized learning activities in seconds, not hours</p>
             </div>
 
             <div className="feature-card">
-              <div className="feature-icon">📄</div>
-              <h3>Print-Ready Materials</h3>
-              <p>Download professionally formatted PDFs with all the materials you need to get started</p>
+              <div className="feature-icon">🎯</div>
+              <h3>Age-Appropriate Content</h3>
+              <p>Activities automatically adjusted for your child&apos;s grade level and learning style</p>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon">🔬</div>
+              <h3>Multiple Subjects</h3>
+              <p>Cover math, science, reading, writing, history, and more with diverse activity types</p>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon">🌟</div>
+              <h3>Customizable</h3>
+              <p>Tailor activities to your child&apos;s interests, learning goals, and educational preferences</p>
             </div>
 
             <div className="feature-card">
@@ -135,8 +92,8 @@ const Welcome = () => {
             </div>
 
             <div className="tier-card member">
+              <div className="tier-badge">Most Popular</div>
               <div className="tier-header">
-                <div className="tier-badge">Most Popular</div>
                 <div className="tier-icon">⭐</div>
                 <h4>Member</h4>
                 <div className="tier-price">$6<span className="price-period">/month</span></div>
@@ -204,15 +161,7 @@ const Welcome = () => {
               <div className="step-number">3</div>
               <div className="step-content">
                 <h4>Generate & Download</h4>
-                <p>Our AI creates a unique activity and provides a print-ready PDF</p>
-              </div>
-            </div>
-
-            <div className="step">
-              <div className="step-number">4</div>
-              <div className="step-content">
-                <h4>Learn & Enjoy</h4>
-                <p>Use the activity with your child and watch them learn through play</p>
+                <p>Get your custom activity as a PDF ready for printing or digital use</p>
               </div>
             </div>
           </div>
@@ -223,7 +172,7 @@ const Welcome = () => {
           <p>Join me in creating amazing learning experiences for work from home and homeschooling parents</p>
           <button 
             className="cta-button"
-            onClick={handleLogin}
+            onClick={onLogin}
           >
             Start Creating Activities
           </button>
