@@ -488,7 +488,8 @@
   }
 
   .tiers-grid {
-    gap: 1rem;
+    grid-template-columns: repeat(3, minmax(100px, 1fr));
+    gap: 0.8rem;
   }
 
   .tier-card {
