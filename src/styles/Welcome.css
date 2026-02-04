@@ -93,13 +93,15 @@
 
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
   margin-top: 2rem;
 }
 
 .feature-card {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  text-align: left;
   padding: 1.5rem;
   border-radius: 12px;
   background: #f8fafc;
@@ -114,7 +116,12 @@
 
 .feature-icon {
   font-size: 3rem;
-  margin-bottom: 1rem;
+  margin-right: 1.5rem;
+  flex-shrink: 0;
+}
+
+.feature-content {
+  flex: 1;
 }
 
 .feature-card h3 {
@@ -127,6 +134,7 @@
 .feature-card p {
   color: #4a5568;
   line-height: 1.6;
+  margin: 0;
 }
 
 /* Membership Tiers Section */
@@ -155,9 +163,9 @@
 
 .tiers-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 2rem;
-  max-width: 1000px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -431,10 +439,14 @@
     padding: 2rem 1rem;
   }
 
-  .feature-grid,
-  .tiers-grid {
+  .feature-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
+  }
+
+  .tiers-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
   }
 
   .tier-card.popular {

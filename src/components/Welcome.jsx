@@ -32,38 +32,50 @@ const Welcome = ({ onLogin }) => {
           <div className="features-grid">
             <div className="feature-card">
               <div className="feature-icon">⚡</div>
-              <h3>Instant Generation</h3>
-              <p>Create personalized learning activities in seconds, not hours</p>
+              <div className="feature-content">
+                <h3>Instant Generation</h3>
+                <p>Create personalized learning activities in seconds, not hours</p>
+              </div>
             </div>
 
             <div className="feature-card">
               <div className="feature-icon">🎯</div>
-              <h3>Age-Appropriate Content</h3>
-              <p>Activities automatically adjusted for your child&apos;s grade level and learning style</p>
+              <div className="feature-content">
+                <h3>Age-Appropriate Content</h3>
+                <p>Activities automatically adjusted for your child&apos;s grade level and learning style</p>
+              </div>
             </div>
 
             <div className="feature-card">
               <div className="feature-icon">🔬</div>
-              <h3>Multiple Subjects</h3>
-              <p>Cover math, science, reading, writing, history, and more with diverse activity types</p>
+              <div className="feature-content">
+                <h3>Multiple Subjects</h3>
+                <p>Cover math, science, reading, writing, history, and more with diverse activity types</p>
+              </div>
             </div>
 
             <div className="feature-card">
               <div className="feature-icon">🌟</div>
-              <h3>Customizable</h3>
-              <p>Tailor activities to your child&apos;s interests, learning goals, and educational preferences</p>
+              <div className="feature-content">
+                <h3>Customizable</h3>
+                <p>Tailor activities to your child&apos;s interests, learning goals, and educational preferences</p>
+              </div>
             </div>
 
             <div className="feature-card">
               <div className="feature-icon">📈</div>
-              <h3>Track Progress</h3>
-              <p>Keep a history of activities and monitor your child&apos;s learning journey</p>
+              <div className="feature-content">
+                <h3>Track Progress</h3>
+                <p>Keep a history of activities and monitor your child&apos;s learning journey</p>
+              </div>
             </div>
 
             <div className="feature-card">
               <div className="feature-icon">🏠</div>
-              <h3>Family-Friendly</h3>
-              <p>Designed specifically for homeschooling families with multiple children and varying needs</p>
+              <div className="feature-content">
+                <h3>Family-Friendly</h3>
+                <p>Designed specifically for homeschooling families with multiple children and varying needs</p>
+              </div>
             </div>
           </div>
         </div>
