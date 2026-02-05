@@ -201,14 +201,11 @@ function App() {
     );
   }
 
-  return (
-    <Routes>
-      <Route path="/" element={isAuthenticated ? <AuthenticatedApp /> : <Welcome onLogin={handleLogin} />} />
-      <Route path="/generate" element={isAuthenticated ? <AuthenticatedApp /> : <Welcome onLogin={handleLogin} />} />
-      <Route path="/history" element={isAuthenticated ? <AuthenticatedApp /> : <Welcome onLogin={handleLogin} />} />
-      <Route path="/feedback" element={isAuthenticated ? <AuthenticatedApp /> : <Welcome onLogin={handleLogin} />} />
-    </Routes>
-  );
+  if (!isAuthenticated) {
+    return <Welcome onLogin={handleLogin} />;
+  }
+
+  return <AuthenticatedApp />;
 }
 
 // Component for authenticated routes
@@ -260,10 +257,10 @@ function AuthenticatedApp() {
       
       <main className="app-content">
         <Routes>
+          <Route path="/" element={<HWHistory />} />
           <Route path="/generate" element={<GenerateActivityForm />} />
           <Route path="/history" element={<HWHistory />} />
           <Route path="/feedback" element={<Feedback />} />
-          <Route path="/" element={<HWHistory />} />
         </Routes>
       </main>
     </div>
