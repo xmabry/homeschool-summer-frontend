@@ -213,6 +213,14 @@ function AuthenticatedApp() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  // Debug logging for AuthenticatedApp
+  useEffect(() => {
+    console.log('AuthenticatedApp: Component mounted/updated', {
+      user: !!user,
+      currentPath: window.location.pathname
+    });
+  }, [user]);
+
   const handleSignOut = async () => {
     try {
       await logout();

@@ -20,6 +20,16 @@ const [downloading, setDownloading] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [userGroups, setUserGroups] = useState([]);
 
+  // Component mount logging
+  useEffect(() => {
+    console.log('HWHistory: Component mounted', {
+      isAuthenticated,
+      authLoading,
+      user: !!user,
+      currentPath: window.location.pathname
+    });
+  }, []);
+
   // Extract user groups from JWT token
   const extractUserGroups = (token) => {
     if (!token) return [];
@@ -45,8 +55,15 @@ const [downloading, setDownloading] = useState(false);
   // Fetch homework history from API - only when user is authenticated
   useEffect(() => {
     const fetchHomeworkHistory = async () => {
+      console.log('HWHistory: fetchHomeworkHistory called', {
+        authLoading,
+        isAuthenticated,
+        user: !!user
+      });
+
       // Don't fetch if auth is still loading or user is not authenticated
       if (authLoading || !isAuthenticated) {
+        console.log('HWHistory: Skipping fetch - auth not ready');
         setLoading(false);
         return;
       }
@@ -311,14 +328,23 @@ const [downloading, setDownloading] = useState(false);
   };
 
   if (authLoading || loading) {
+    console.log('HWHistory: Showing loading state', { authLoading, loading, isAuthenticated });
     return (
       <div className="hw-history-container">
-        <div className="loading-spinner">Loading homework history...</div>
+        <div className="loading-spinner">
+          Loading homework history...
+          <div style={{fontSize: '12px', color: '#666', marginTop: '10px'}}>
+            Auth Loading: {authLoading ? 'Yes' : 'No'} | 
+            Data Loading: {loading ? 'Yes' : 'No'} | 
+            Authenticated: {isAuthenticated ? 'Yes' : 'No'}
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!isAuthenticated) {
+    console.log('HWHistory: User not authenticated', { user, isAuthenticated });
     return (
       <div className="hw-history-container">
         <div className="auth-required">
