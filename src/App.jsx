@@ -125,7 +125,26 @@ function App() {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Token exchange failed with response:', errorText);
-        throw new Error(`Token exchange failed: ${response.status} - ${errorText}`);
+        
+        // Parse common OAuth errors
+        let errorMessage = `Token exchange failed: ${response.status}`;
+        try {
+          const errorData = JSON.parse(errorText);
+          if (errorData.error) {
+            errorMessage = `${errorData.error}: ${errorData.error_description || 'No description provided'}`;
+            
+            // Specific error handling
+            if (errorData.error === 'invalid_grant') {
+              errorMessage += '\n\nThis usually means:\n1. Authorization code has expired\n2. Redirect URI mismatch\n3. Code already used\n\nCheck that redirect URI in .env matches Cognito App Client settings exactly.';
+            } else if (errorData.error === 'invalid_client') {
+              errorMessage += '\n\nCheck that:\n1. Client ID is correct\n2. OAuth flows are enabled in Cognito\n3. Domain configuration is correct';
+            }
+          }
+        } catch (parseError) {
+          errorMessage += `\nRaw response: ${errorText}`;
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const tokens = await response.json();

@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import '../styles/HWHistory.css';
-import { useAuth } from '../contexts/AuthContext';
 import ErrorResponse from './ErrorResponse';
-import { getHistory } from '../services/generatorService';
 import { downloadMultiplePDFs } from '../services/downloadService';
-import { fetchAuthSession, getCurrentUser } from 'aws-amplify/auth';
+import homeworkHistoryService from '../services/homeworkHistoryService';
 
 const HWHistory = () => {
-  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [homeworkHistory, setHomeworkHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,107 +13,42 @@ const HWHistory = () => {
   const [filterSubject, setFilterSubject] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedItems, setSelectedItems] = useState(new Set());
-const [downloading, setDownloading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [userGroups, setUserGroups] = useState([]);
 
-  // Component mount logging
-  useEffect(() => {
-    console.log('HWHistory: Component mounted', {
-      isAuthenticated,
-      authLoading,
-      user: !!user,
-      currentPath: window.location.pathname
-    });
-  }, []);
 
-  // Extract user groups from JWT token
-  const extractUserGroups = (token) => {
-    if (!token) return [];
-    try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-      const payload = JSON.parse(jsonPayload);
-      return payload['cognito:groups'] || [];
-    } catch (error) {
-      console.error('Error extracting user groups:', error);
-      return [];
-    }
-  };
 
   // Check if user has sharing permissions (member or premium)
   const canShare = useMemo(() => {
     return userGroups.includes('member') || userGroups.includes('premium');
   }, [userGroups]);
 
-  // Fetch homework history from API - only when user is authenticated
+  // Fetch homework history from API
   useEffect(() => {
-    const fetchHomeworkHistory = async () => {
-      console.log('HWHistory: fetchHomeworkHistory called', {
-        authLoading,
-        isAuthenticated,
-        user: !!user
-      });
-
-      // Don't fetch if auth is still loading or user is not authenticated
-      if (authLoading || !isAuthenticated) {
-        console.log('HWHistory: Skipping fetch - auth not ready');
-        setLoading(false);
-        return;
-      }
-
+    const loadHomeworkHistory = async () => {
       try {
         setLoading(true);
         setError(null);
         
-        // Get user-specific history through the authorized service
-        const data = await getHistory();
-        
-        // Ensure we only display data that belongs to the authenticated user
-        const userHistory = Array.isArray(data.activities) ? data.activities : 
-                           Array.isArray(data) ? data : [];
-        
+        const userHistory = await homeworkHistoryService.fetchHomeworkHistory();
         setHomeworkHistory(userHistory);
       } catch (err) {
-        console.error('Error fetching homework history:', err);
-        if (err.message.includes('Authentication failed')) {
-          setError('Please log in again to view your homework history.');
-        } else {
-          setError(err.message || 'Failed to load homework history.');
-        }
+        setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchHomeworkHistory();
-  }, [isAuthenticated, authLoading]);
+    loadHomeworkHistory();
+  }, []);
 
-  // Extract user groups when user changes
+  // TODO: Extract user groups from API or context when needed
   useEffect(() => {
-    const extractGroups = async () => {
-      if (isAuthenticated && user) {
-        try {
-          const session = await fetchAuthSession();
-          const idToken = session?.tokens?.idToken?.toString();
-          if (idToken) {
-            const groups = extractUserGroups(idToken);
-            setUserGroups(groups);
-          }
-        } catch (error) {
-          console.error('Error extracting user groups:', error);
-          setUserGroups([]);
-        }
-      } else {
-        setUserGroups([]);
-      }
-    };
-
-    extractGroups();
-  }, [user, isAuthenticated]);
+    // For now, assume user has basic permissions
+    // This should be handled by the parent authentication system
+    setUserGroups(['viewer']); // Default permission
+  }, []);
 
   // Handle item selection (max 3 items)
   const handleItemSelect = (itemId) => {
@@ -141,26 +73,12 @@ const [downloading, setDownloading] = useState(false);
     try {
       setDownloading(true);
       
-      // Get current user and auth session using the updated Amplify v6 API
-      const [currentUser, session] = await Promise.all([
-        getCurrentUser(),
-        fetchAuthSession()
-      ]);
-      
-      const token = session.tokens?.idToken?.toString();
-      
-      if (!token) {
-        throw new Error('User is not authenticated');
-      }
-
       const selectedHomework = homeworkHistory.filter(item => 
         selectedItems.has(item.id)
       );
 
       const downloadRequests = selectedHomework.map(homework => ({
         key: homework.pdfKey || homework.s3Key || `homework-${homework.id}.pdf`,
-        userId: currentUser.userId,
-        token: token,
         bucketName: null // Use default bucket
       }));
 
@@ -196,35 +114,21 @@ const [downloading, setDownloading] = useState(false);
     try {
       setSharing(true);
       
-      // Get current user and auth session
-      const [currentUser, session] = await Promise.all([
-        getCurrentUser(),
-        fetchAuthSession()
-      ]);
-      
-      const token = session.tokens?.idToken?.toString();
-      
-      if (!token) {
-        throw new Error('User is not authenticated');
-      }
-
       const selectedHomework = homeworkHistory.filter(item => 
         selectedItems.has(item.id)
       );
 
       const apiEndpoint = import.meta.env.VITE_API_ENDPOINT || import.meta.env.REACT_APP_API_ENDPOINT;
       
-      // Share each selected item
+      // Share each selected item - auth handled by App.jsx
       const sharePromises = selectedHomework.map(homework => 
         fetch(`${apiEndpoint}/share`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
             itemId: homework.id,
-            userId: currentUser.userId,
             title: homework.title,
             subject: homework.subject,
             gradeLevel: homework.gradeLevel
@@ -268,47 +172,24 @@ const [downloading, setDownloading] = useState(false);
     setSortConfig({ key, direction });
   };
 
-  // Filter and sort data
+  // Filter and sort data using service
   const filteredAndSortedData = useMemo(() => {
-    let filteredData = homeworkHistory.filter(item => {
-      const matchesGrade = !filterGrade || item.gradeLevel === filterGrade;
-      const matchesSubject = !filterSubject || item.subject === filterSubject;
-      const matchesSearch = !searchTerm || 
-        item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.description?.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      return matchesGrade && matchesSubject && matchesSearch;
-    });
-
-    // Sort data
-    if (sortConfig.key) {
-      filteredData.sort((a, b) => {
-        let aValue = a[sortConfig.key];
-        let bValue = b[sortConfig.key];
-
-        // Handle date sorting
-        if (sortConfig.key === 'createdAt' || sortConfig.key === 'updatedAt') {
-          aValue = new Date(aValue);
-          bValue = new Date(bValue);
-        }
-
-        if (aValue < bValue) {
-          return sortConfig.direction === 'asc' ? -1 : 1;
-        }
-        if (aValue > bValue) {
-          return sortConfig.direction === 'asc' ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-
-    return filteredData;
+    const filters = {
+      grade: filterGrade,
+      subject: filterSubject,
+      searchTerm: searchTerm
+    };
+    
+    return homeworkHistoryService.filterAndSortHomeworkHistory(
+      homeworkHistory, 
+      filters, 
+      sortConfig
+    );
   }, [homeworkHistory, sortConfig, filterGrade, filterSubject, searchTerm]);
 
   // Get unique grades and subjects for filters
-  const uniqueGrades = [...new Set(homeworkHistory.map(item => item.gradeLevel))].sort();
-  const uniqueSubjects = [...new Set(homeworkHistory.map(item => item.subject))].sort();
+  const uniqueGrades = homeworkHistoryService.getUniqueGrades(homeworkHistory);
+  const uniqueSubjects = homeworkHistoryService.getUniqueSubjects(homeworkHistory);
 
   const getSortIcon = (columnName) => {
     if (sortConfig.key === columnName) {
@@ -317,39 +198,11 @@ const [downloading, setDownloading] = useState(false);
     return '↕';
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  if (authLoading || loading) {
-    console.log('HWHistory: Showing loading state', { authLoading, loading, isAuthenticated });
+  if (loading) {
     return (
       <div className="hw-history-container">
         <div className="loading-spinner">
           Loading homework history...
-          <div style={{fontSize: '12px', color: '#666', marginTop: '10px'}}>
-            Auth Loading: {authLoading ? 'Yes' : 'No'} | 
-            Data Loading: {loading ? 'Yes' : 'No'} | 
-            Authenticated: {isAuthenticated ? 'Yes' : 'No'}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    console.log('HWHistory: User not authenticated', { user, isAuthenticated });
-    return (
-      <div className="hw-history-container">
-        <div className="auth-required">
-          <h3>Authentication Required</h3>
-          <p>Please log in to view your homework history.</p>
         </div>
       </div>
     );
@@ -362,10 +215,7 @@ const [downloading, setDownloading] = useState(false);
           error={{ message: error }}
           onRetry={() => {
             setError(null);
-            // Only retry if user is authenticated
-            if (isAuthenticated) {
-              window.location.reload();
-            }
+            window.location.reload();
           }}
           onDismiss={() => {
             setError(null);
@@ -494,7 +344,7 @@ const [downloading, setDownloading] = useState(false);
                       {homework.difficulty}
                     </span>
                   </td>
-                  <td className="date-cell">{formatDate(homework.createdAt)}</td>
+                  <td className="date-cell">{homeworkHistoryService.formatDate(homework.createdAt)}</td>
                   <td className="description-cell">
                     <div className="description-text">
                       {homework.description || 'No description available'}
