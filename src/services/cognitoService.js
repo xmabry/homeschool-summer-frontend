@@ -11,9 +11,12 @@ class CognitoService {
   constructor() {
     // Get configuration from environment variables
     this.userPoolId = import.meta.env.VITE_COGNITO_USER_POOL_ID || import.meta.env.REACT_APP_COGNITO_USER_POOL_ID;
-    this.clientId = import.meta.env.VITE_COGNITO_USER_POOL_CLIENT_ID || import.meta.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID;
+    this.clientId = import.meta.env.VITE_COGNITO_CLIENT_ID || 
+                    import.meta.env.VITE_COGNITO_USER_POOL_CLIENT_ID || 
+                    import.meta.env.REACT_APP_COGNITO_CLIENT_ID ||
+                    import.meta.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID;
     this.region = import.meta.env.VITE_AWS_REGION || import.meta.env.REACT_APP_AWS_REGION || 'us-east-1';
-    
+    this.domain = import.meta.env.VITE_COGNITO_DOMAIN || import.meta.env.REACT_APP_COGNITO_DOMAIN;    
     // Initialize Cognito client
     this.client = new CognitoIdentityProviderClient({
       region: this.region
@@ -26,8 +29,20 @@ class CognitoService {
     this.USER_INFO_KEY = 'cognito_user_info';
   }
 
-  // Store tokens in localStorage
+  // Store tokens in localStorage - handles both OAuth and direct auth formats
   _storeTokens(tokens) {
+    // Handle OAuth format (snake_case)
+    if (tokens.access_token) {
+      localStorage.setItem(this.ACCESS_TOKEN_KEY, tokens.access_token);
+    }
+    if (tokens.id_token) {
+      localStorage.setItem(this.ID_TOKEN_KEY, tokens.id_token);
+    }
+    if (tokens.refresh_token) {
+      localStorage.setItem(this.REFRESH_TOKEN_KEY, tokens.refresh_token);
+    }
+    
+    // Handle direct auth format (PascalCase) - backward compatibility
     if (tokens.AccessToken) {
       localStorage.setItem(this.ACCESS_TOKEN_KEY, tokens.AccessToken);
     }
@@ -268,6 +283,147 @@ class CognitoService {
   isAuthenticated() {
     const tokens = this._getStoredTokens();
     return tokens.accessToken && !this._isTokenExpired(tokens.accessToken);
+  }
+
+  // OAuth2 Authorization Code Exchange
+  async exchangeCodeForTokens(authCode, redirectUri = null) {
+    try {
+      if (!this.domain) {
+        throw new Error('Cognito domain not configured. Set VITE_COGNITO_DOMAIN in environment variables.');
+      }
+      
+      if (!this.clientId) {
+        throw new Error('Cognito client ID not configured. Set VITE_COGNITO_CLIENT_ID in environment variables.');
+      }
+
+      // Use provided redirectUri or construct default
+      const finalRedirectUri = redirectUri || 
+        import.meta.env.VITE_COGNITO_REDIRECT_URI || 
+        import.meta.env.REACT_APP_COGNITO_REDIRECT_URI || 
+        `${window.location.origin}/`;
+
+      console.log('CognitoService: Exchanging authorization code for tokens', {
+        domain: this.domain,
+        clientId: this.clientId.substring(0, 10) + '...',
+        redirectUri: finalRedirectUri,
+        authCode: authCode.substring(0, 10) + '...'
+      });
+
+      const response = await fetch(`https://${this.domain}/oauth2/token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          grant_type: 'authorization_code',
+          client_id: this.clientId,
+          code: authCode,
+          redirect_uri: finalRedirectUri,
+        }),
+      });
+
+      console.log('CognitoService: Token exchange response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('CognitoService: Token exchange failed:', errorText);
+        
+        // Parse and enhance error message
+        let errorMessage = `Token exchange failed: ${response.status}`;
+        try {
+          const errorData = JSON.parse(errorText);
+          if (errorData.error) {
+            errorMessage = `${errorData.error}: ${errorData.error_description || 'No description provided'}`;
+            
+            if (errorData.error === 'invalid_grant') {
+              errorMessage += '\n\nCommon causes:\n• Authorization code expired or already used\n• Redirect URI mismatch\n• Check that VITE_COGNITO_REDIRECT_URI matches Cognito App Client settings';
+            } else if (errorData.error === 'invalid_client') {
+              errorMessage += '\n\nCheck:\n• Client ID is correct\n• OAuth flows enabled in Cognito\n• Domain configuration is correct';
+            }
+          }
+        } catch (parseError) {
+          errorMessage += `\nRaw response: ${errorText}`;
+        }
+        
+        throw new Error(errorMessage);
+      }
+
+      const tokens = await response.json();
+      console.log('CognitoService: Received tokens:', {
+        access_token: tokens.access_token ? 'present' : 'missing',
+        id_token: tokens.id_token ? 'present' : 'missing',
+        refresh_token: tokens.refresh_token ? 'present' : 'missing'
+      });
+      
+      // Store tokens (handles OAuth format automatically)
+      this._storeTokens(tokens);
+      
+      // Extract user info from ID token and cache it
+      if (tokens.id_token) {
+        try {
+          const userInfo = this._extractUserFromIdToken(tokens.id_token);
+          localStorage.setItem(this.USER_INFO_KEY, JSON.stringify(userInfo));
+          console.log('CognitoService: User info extracted and cached');
+        } catch (error) {
+          console.warn('CognitoService: Failed to extract user info from ID token:', error);
+        }
+      }
+      
+      return {
+        success: true,
+        tokens: tokens
+      };
+    } catch (error) {
+      console.error('CognitoService: Error in exchangeCodeForTokens:', error);
+      throw error;
+    }
+  }
+
+  // Extract user information from ID token
+  _extractUserFromIdToken(idToken) {
+    const payload = this._parseJWT(idToken);
+    if (!payload) {
+      throw new Error('Invalid ID token');
+    }
+    
+    return {
+      username: payload['cognito:username'] || payload.sub,
+      userId: payload.sub,
+      email: payload.email,
+      attributes: {
+        sub: payload.sub,
+        email: payload.email,
+        email_verified: payload.email_verified,
+        'cognito:groups': payload['cognito:groups'] || [],
+        'cognito:username': payload['cognito:username']
+      },
+      userStatus: 'CONFIRMED' // OAuth users are always confirmed
+    };
+  }
+
+  // Build Cognito Hosted UI login URL
+  buildLoginUrl(redirectUri = null, state = null) {
+    if (!this.domain || !this.clientId) {
+      throw new Error('Cognito domain and client ID must be configured');
+    }
+    
+    const finalRedirectUri = redirectUri || 
+      import.meta.env.VITE_COGNITO_REDIRECT_URI || 
+      import.meta.env.REACT_APP_COGNITO_REDIRECT_URI || 
+      `${window.location.origin}/`;
+    
+    const params = new URLSearchParams({
+      client_id: this.clientId,
+      response_type: 'code',
+      scope: 'email openid phone profile',
+      redirect_uri: finalRedirectUri
+    });
+    
+    if (state) {
+      params.append('state', state);
+    }
+    
+    return `https://${this.domain}/login?${params.toString()}`;
   }
 }
 

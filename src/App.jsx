@@ -53,11 +53,19 @@ function App() {
 
         setProcessingCallback(true);
         try {
-          // Exchange authorization code for tokens
-          await exchangeCodeForTokens(code);
+          // Use cognitoService for token exchange
+          await cognitoService.exchangeCodeForTokens(code);
           
           // Mark this code as processed
           sessionStorage.setItem('lastProcessedCode', code);
+          
+          // Refresh user in AuthContext
+          const refreshResult = await refreshUser();
+          if (!refreshResult) {
+            console.warn('RefreshUser returned false, but continuing...');
+          }
+          
+          console.log('User authenticated successfully');
           
           // Navigate to history page after successful authentication
           navigate('/history', { replace: true });
@@ -79,134 +87,17 @@ function App() {
     handleCognitoCallback();
   }, [isAuthenticated]);
 
-  // Exchange authorization code for tokens
-  const exchangeCodeForTokens = async (authCode) => {
-    const cognitoConfig = {
-      domain: import.meta.env.VITE_COGNITO_DOMAIN || import.meta.env.REACT_APP_COGNITO_DOMAIN,
-      clientId: import.meta.env.VITE_COGNITO_CLIENT_ID || 
-                import.meta.env.REACT_APP_COGNITO_CLIENT_ID ||
-                import.meta.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID,
-      // Must match exactly with the redirectUri used in the authorization request
-      redirectUri: import.meta.env.VITE_COGNITO_REDIRECT_URI || 
-                   import.meta.env.REACT_APP_COGNITO_REDIRECT_URI || 
-                   `${window.location.origin}/`
-    };
-
-    console.log('Token exchange - Cognito config:', {
-      domain: cognitoConfig.domain,
-      clientId: cognitoConfig.clientId ? cognitoConfig.clientId.substring(0, 10) + '...' : 'undefined',
-      redirectUri: cognitoConfig.redirectUri,
-      currentUrl: window.location.href,
-      authCode: authCode ? authCode.substring(0, 10) + '...' : 'undefined'
-    });
-
-    // Validate required config
-    if (!cognitoConfig.domain || !cognitoConfig.clientId) {
-      throw new Error(`Missing required Cognito configuration. Domain: ${cognitoConfig.domain}, ClientId: ${cognitoConfig.clientId ? 'present' : 'missing'}`);
-    }
-
-    try {
-      console.log('Making token exchange request...');
-      const response = await fetch(`https://${cognitoConfig.domain}/oauth2/token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          grant_type: 'authorization_code',
-          client_id: cognitoConfig.clientId,
-          code: authCode,
-          redirect_uri: cognitoConfig.redirectUri,
-        }),
-      });
-
-      console.log('Token exchange response status:', response.status);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Token exchange failed with response:', errorText);
-        
-        // Parse common OAuth errors
-        let errorMessage = `Token exchange failed: ${response.status}`;
-        try {
-          const errorData = JSON.parse(errorText);
-          if (errorData.error) {
-            errorMessage = `${errorData.error}: ${errorData.error_description || 'No description provided'}`;
-            
-            // Specific error handling
-            if (errorData.error === 'invalid_grant') {
-              errorMessage += '\n\nThis usually means:\n1. Authorization code has expired\n2. Redirect URI mismatch\n3. Code already used\n\nCheck that redirect URI in .env matches Cognito App Client settings exactly.';
-            } else if (errorData.error === 'invalid_client') {
-              errorMessage += '\n\nCheck that:\n1. Client ID is correct\n2. OAuth flows are enabled in Cognito\n3. Domain configuration is correct';
-            }
-          }
-        } catch (parseError) {
-          errorMessage += `\nRaw response: ${errorText}`;
-        }
-        
-        throw new Error(errorMessage);
-      }
-
-      const tokens = await response.json();
-      console.log('Received tokens:', {
-        access_token: tokens.access_token ? 'present' : 'missing',
-        id_token: tokens.id_token ? 'present' : 'missing', 
-        refresh_token: tokens.refresh_token ? 'present' : 'missing'
-      });
-      
-      // Store tokens using cognitoService
-      cognitoService._storeTokens({
-        AccessToken: tokens.access_token,
-        IdToken: tokens.id_token,
-        RefreshToken: tokens.refresh_token,
-      });
-
-      console.log('Tokens stored, refreshing user...');
-      // Refresh user in AuthContext
-      const refreshResult = await refreshUser();
-      if (!refreshResult) {
-        console.warn('RefreshUser returned false, but continuing...');
-      }
-      console.log('User authenticated successfully');
-    } catch (error) {
-      console.error('Detailed error in exchangeCodeForTokens:', error);
-      throw error;
-    }
-  };
-
   // Login function to be passed to Welcome component
   const handleLogin = () => {
-    const cognitoConfig = {
-      domain: import.meta.env.VITE_COGNITO_DOMAIN || import.meta.env.REACT_APP_COGNITO_DOMAIN,
-      clientId: import.meta.env.VITE_COGNITO_CLIENT_ID || 
-                import.meta.env.REACT_APP_COGNITO_CLIENT_ID ||
-                import.meta.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID,
-      region: import.meta.env.VITE_AWS_REGION || 
-              import.meta.env.REACT_APP_AWS_REGION || 
-              'us-east-1',
-      redirectUri: import.meta.env.VITE_COGNITO_REDIRECT_URI || 
-                   import.meta.env.REACT_APP_COGNITO_REDIRECT_URI || 
-                   `${window.location.origin}/`
-    };
-
-    // Validate required environment variables
-    if (!cognitoConfig.domain || !cognitoConfig.clientId) {
-      console.error('Missing required Cognito configuration:', {
-        domain: cognitoConfig.domain,
-        clientId: cognitoConfig.clientId ? 'present' : 'missing'
-      });
-      return;
+    try {
+      // Use cognitoService to build login URL
+      const loginUrl = cognitoService.buildLoginUrl();
+      console.log('Redirecting to Cognito login URL');
+      window.location.href = loginUrl;
+    } catch (error) {
+      console.error('Error building login URL:', error);
+      alert(`Login configuration error: ${error.message}`);
     }
-
-    // Build Cognito hosted UI login URL
-    const loginUrl = `https://${cognitoConfig.domain}/login?` +
-      `client_id=${cognitoConfig.clientId}&` +
-      `response_type=code&` +
-      `scope=email+openid+phone+profile&` +
-      `redirect_uri=${encodeURIComponent(cognitoConfig.redirectUri)}`;
-
-    console.log('Redirecting to Cognito login URL');
-    window.location.href = loginUrl;
   };
 
   // Show loading state while processing callback or auth is loading
