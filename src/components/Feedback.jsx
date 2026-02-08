@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import '../styles/Feedback.css';
 import ErrorResponse from './ErrorResponse';
-import { submitFeedback } from '../services/generatorService';
+import { submitFeedback } from '../services/feedbackService';
 
 const Feedback = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    uiRating: '',
+    contentRating: '',
     feedback: '',
     pricePoint: ''
   });
@@ -47,13 +49,15 @@ const Feedback = () => {
       const result = await submitFeedback({
         name: formData.name.trim(),
         email: formData.email.trim(),
+        uiRating: formData.uiRating || null,
+        contentRating: formData.contentRating || null,
         feedback: formData.feedback.trim(),
         pricePoint: formData.pricePoint || null
       });
 
       if (result.success) {
         setSuccess(true);
-        setFormData({ name: '', email: '', feedback: '' });
+        setFormData({ name: '', email: '', uiRating: '', contentRating: '', feedback: '', pricePoint: '' });
       } else {
         throw new Error(result.error || 'Failed to submit feedback');
       }
@@ -66,7 +70,7 @@ const Feedback = () => {
   };
 
   const handleReset = () => {
-    setFormData({ name: '', email: '', feedback: '', pricePoint: '' });
+    setFormData({ name: '', email: '', uiRating: '', contentRating: '', feedback: '', pricePoint: '' });
     setError(null);
     setSuccess(false);
   };
@@ -76,7 +80,7 @@ const Feedback = () => {
       <div className="feedback-card">
         <div className="feedback-header">
           <h2>Share Your Feedback</h2>
-          <p>We`apost;d love to hear your thoughts about the Homeschool Activity Generator</p>
+          <p>We`apost;`d love to hear your thoughts about the Homeschool Activity Generator</p>
         </div>
 
         {success && (
@@ -126,6 +130,114 @@ const Feedback = () => {
             </div>
 
             <div className="form-group">
+              <label htmlFor="uiRating">How would you rate the user interface and ease of use?</label>
+              <div className="rating-group">
+                <div className="radio-option">
+                  <input
+                    type="radio"
+                    id="ui-excellent"
+                    name="uiRating"
+                    value="Excellent"
+                    checked={formData.uiRating === 'Excellent'}
+                    onChange={handleInputChange}
+                    disabled={loading}
+                  />
+                  <label htmlFor="ui-excellent">Excellent</label>
+                </div>
+                <div className="radio-option">
+                  <input
+                    type="radio"
+                    id="ui-good"
+                    name="uiRating"
+                    value="Good"
+                    checked={formData.uiRating === 'Good'}
+                    onChange={handleInputChange}
+                    disabled={loading}
+                  />
+                  <label htmlFor="ui-good">Good</label>
+                </div>
+                <div className="radio-option">
+                  <input
+                    type="radio"
+                    id="ui-average"
+                    name="uiRating"
+                    value="Average"
+                    checked={formData.uiRating === 'Average'}
+                    onChange={handleInputChange}
+                    disabled={loading}
+                  />
+                  <label htmlFor="ui-average">Average</label>
+                </div>
+                <div className="radio-option">
+                  <input
+                    type="radio"
+                    id="ui-poor"
+                    name="uiRating"
+                    value="Poor"
+                    checked={formData.uiRating === 'Poor'}
+                    onChange={handleInputChange}
+                    disabled={loading}
+                  />
+                  <label htmlFor="ui-poor">Poor</label>
+                </div>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="contentRating">How would you rate the quality of the generated learning activities?</label>
+              <div className="rating-group">
+                <div className="radio-option">
+                  <input
+                    type="radio"
+                    id="content-excellent"
+                    name="contentRating"
+                    value="Excellent"
+                    checked={formData.contentRating === 'Excellent'}
+                    onChange={handleInputChange}
+                    disabled={loading}
+                  />
+                  <label htmlFor="content-excellent">Excellent</label>
+                </div>
+                <div className="radio-option">
+                  <input
+                    type="radio"
+                    id="content-good"
+                    name="contentRating"
+                    value="Good"
+                    checked={formData.contentRating === 'Good'}
+                    onChange={handleInputChange}
+                    disabled={loading}
+                  />
+                  <label htmlFor="content-good">Good</label>
+                </div>
+                <div className="radio-option">
+                  <input
+                    type="radio"
+                    id="content-average"
+                    name="contentRating"
+                    value="Average"
+                    checked={formData.contentRating === 'Average'}
+                    onChange={handleInputChange}
+                    disabled={loading}
+                  />
+                  <label htmlFor="content-average">Average</label>
+                </div>
+                <div className="radio-option">
+                  <input
+                    type="radio"
+                    id="content-poor"
+                    name="contentRating"
+                    value="Poor"
+                    checked={formData.contentRating === 'Poor'}
+                    onChange={handleInputChange}
+                    disabled={loading}
+                  />
+                  <label htmlFor="content-poor">Poor</label>
+                </div>
+              </div>
+            </div>
+
+            <div className="form-group">
               <label htmlFor="feedback">Your Feedback *</label>
               <textarea
                 id="feedback"
@@ -149,18 +261,6 @@ const Feedback = () => {
                 <div className="radio-option">
                   <input
                     type="radio"
-                    id="price-10-20"
-                    name="pricePoint"
-                    value="$10-$20/year"
-                    checked={formData.pricePoint === '$10-$20/year'}
-                    onChange={handleInputChange}
-                    disabled={loading}
-                  />
-                  <label htmlFor="price-10-20">$10-$20/year</label>
-                </div>
-                <div className="radio-option">
-                  <input
-                    type="radio"
                     id="price-20-30"
                     name="pricePoint"
                     value="$20-$30/year"
@@ -173,26 +273,38 @@ const Feedback = () => {
                 <div className="radio-option">
                   <input
                     type="radio"
-                    id="price-30-40"
+                    id="price-31-40"
                     name="pricePoint"
-                    value="$30-$40/year"
-                    checked={formData.pricePoint === '$30-$40/year'}
+                    value="$31-$40/year"
+                    checked={formData.pricePoint === '$31-$40/year'}
                     onChange={handleInputChange}
                     disabled={loading}
                   />
-                  <label htmlFor="price-30-40">$30-$40/year</label>
+                  <label htmlFor="price-31-40">$31-$40/year</label>
                 </div>
                 <div className="radio-option">
                   <input
                     type="radio"
-                    id="price-40-50"
+                    id="price-41-50"
                     name="pricePoint"
-                    value="$40-$50/year"
-                    checked={formData.pricePoint === '$40-$50/year'}
+                    value="$41-$50/year"
+                    checked={formData.pricePoint === '$41-$50/year'}
                     onChange={handleInputChange}
                     disabled={loading}
                   />
-                  <label htmlFor="price-40-50">$40-$50/year</label>
+                  <label htmlFor="price-41-50">$41-$50/year</label>
+                </div>
+                <div className="radio-option">
+                  <input
+                    type="radio"
+                    id="price-51-plus"
+                    name="pricePoint"
+                    value="$51+/year"
+                    checked={formData.pricePoint === '$51+/year'}
+                    onChange={handleInputChange}
+                    disabled={loading}
+                  />
+                  <label htmlFor="price-51-plus">$51+/year</label>
                 </div>
               </div>
               <small className="help-text">Optional - This helps us understand what pricing would be most accessible for homeschooling families</small>
