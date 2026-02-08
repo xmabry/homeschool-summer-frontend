@@ -1,17 +1,50 @@
 // Homework History Service
 // Handles fetching and processing homework history data
 
-import { getHistory } from './generatorService';
+import cognitoService from './cognitoService';
 
 /**
  * Fetches homework history for the current user
+ * @param {Object} filters - Optional filters for the history query
  * @returns {Promise<Array>} Array of homework history items
  * @throws {Error} If the fetch operation fails
  */
-export const fetchHomeworkHistory = async () => {
+export const fetchHomeworkHistory = async (filters = {}) => {
   try {
-    // Get user history through the authorized service
-    const data = await getHistory();
+    // Get current user info from Cognito service
+    const userResult = await cognitoService.getCurrentUser();
+    if (!userResult.success) {
+      throw new Error('User is not authenticated');
+    }
+    
+    const token = cognitoService.getIdToken();
+    if (!token) {
+      throw new Error('User is not authenticated');
+    }
+    
+    // Build query parameters if filters are provided
+    const queryParams = new URLSearchParams({
+      userId: userResult.user.userId,
+      ...filters
+    });
+    
+    const apiEndpoint = import.meta.env.VITE_API_ENDPOINT || import.meta.env.REACT_APP_API_ENDPOINT;
+    const response = await fetch(`${apiEndpoint}/activities/history?${queryParams}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Authentication failed. Please log in again.');
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
     
     // Ensure we handle different response formats
     const userHistory = Array.isArray(data.activities) ? data.activities : 
