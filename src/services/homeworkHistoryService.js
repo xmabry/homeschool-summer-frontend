@@ -22,14 +22,20 @@ export const fetchHomeworkHistory = async (filters = {}) => {
       throw new Error('User is not authenticated');
     }
     
-    // Build query parameters if filters are provided
+    console.log('HomeworkHistory: Fetching history for user:', {
+      username: userResult.user.username,
+      hasToken: !!token,
+      tokenStart: token ? token.substring(0, 20) + '...' : 'none'
+    });
+    
+    // Build query parameters using the actual username from login
     const queryParams = new URLSearchParams({
-      userId: userResult.user.userId,
+      username: userResult.user.username,
       ...filters
     });
     
     const apiEndpoint = import.meta.env.VITE_API_ENDPOINT || import.meta.env.REACT_APP_API_ENDPOINT;
-    const response = await fetch(`${apiEndpoint}/activities/history?${queryParams}`, {
+    const response = await fetch(`${apiEndpoint}history?${queryParams}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
