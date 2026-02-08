@@ -35,7 +35,7 @@ export const fetchHomeworkHistory = async (filters = {}) => {
     });
     
     const apiEndpoint = import.meta.env.VITE_API_ENDPOINT || import.meta.env.REACT_APP_API_ENDPOINT;
-    const response = await fetch(`${apiEndpoint}history?${queryParams}`, {
+    const response = await fetch(`${apiEndpoint}/history?${queryParams}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
